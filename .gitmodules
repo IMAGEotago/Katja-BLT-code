@@ -1,0 +1,3 @@
+[submodule "DMpy"]
+	path = DMpy
+	url = https://github.com/IMAGEotago/DMpy.git
