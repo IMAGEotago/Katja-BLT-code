@@ -13,7 +13,7 @@ import os
 
 # open matlab file
 fileDir = os.path.dirname(os.path.realpath('__file__'))
-mat_file = os.path.join(fileDir, '../test_data/testKB_task_BLT_2021_03_09_130052.mat')
+mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat') #edit filepath
 mat_file = os.path.abspath(os.path.realpath(mat_file))
 
 mat_contents = sio.loadmat(mat_file) #reads matlab variables into python dict
@@ -21,22 +21,6 @@ mat_contents = sio.loadmat(mat_file) #reads matlab variables into python dict
 params = mat_contents['params'][0][0]
 
 outcomes = np.array(params[10]).reshape(len(params[10])) #check right one, could be at 7
-print(outcomes)
-
-# outcomes = np.array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
-#                      0., 1., 1., 1., 0., 0., 1., 1., 1., 0., 0., 0., 1., 0., 0.,
-#                      0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 0., 1., 1.,
-#                      0., 0., 0., 1., 1., 0., 1., 1., 1., 1., 1., 1., 1., 1., 0.,
-#                      1., 1., 0., 0., 1., 0., 1., 0., 0., 0., 0., 1., 0., 1., 1.,
-#                      1., 1., 1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-#                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 1., 0.,
-#                      1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0., 1., 1., 1.,
-#                      0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 1., 0., 0., 1., 1.,
-#                      0., 0., 1., 1., 1., 1., 1., 0., 1., 1., 0., 0., 0., 1., 0.,
-#                      0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 1., 0., 1.,
-#                      1., 1., 0., 0., 1., 1., 1., 0., 1., 0., 1., 1., 0., 1., 1.,
-#                      0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.,
-#                      0., 0., 0., 0., 1.])
 
 n_outcomes = len(outcomes)
 
@@ -44,25 +28,30 @@ n_outcomes = len(outcomes)
 # set parameters
 value = Parameter('value', 'fixed', mean=0.5, dynamic=True)
 alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
-beta = Parameter('beta', 'flat', mean=1) #TODO: change to appropriate value
+beta = Parameter('beta', 'flat', mean=3)
 
 n_subjects = 25
 value_values = [0.5] * n_subjects
-alpha_values = np.random.uniform(0.0, 1.0, n_subjects) #TODO: determine appropriate no. of samples
-beta_values = [1] * n_subjects #TODO: determine appropriate value/s
+alpha_values = np.random.uniform(0.0, 1.0, n_subjects) 
+beta_values = [3] * n_subjects #TODO: determine appropriate value/s
 
 # create model
 # learning model is rescorla_wagner model with parameter alpha
 # observation model is softmax with parameter beta
-model = DMModel(rescorla_wagner,[value, alpha], softmax, [beta])
+model = DMModel(rescorla_wagner,[value, alpha], softmax, [beta], logp_function='bernoulli')
 
 # simulate data for parameter recovery
 _, sim_rw = model.simulate(outcomes=outcomes,
                            n_subjects=n_subjects,
-                           output_file='test_blt_responses.csv',
+                           output_file='output_files/test_blt_responses.csv',
                            learning_parameters={'value' : value_values,
                                                 'alpha' : alpha_values},
-                           observation_parameters={'beta' : beta_values})
+                           observation_parameters={'beta' : beta_values},
+                           return_choices=True)
+#check fitting decisions - check model fits choices
+#implement a beta response model
+#add noise
+#change to a MAP or MCMC estimate
 
 # plot simulated data
 x = np.arange(n_outcomes)

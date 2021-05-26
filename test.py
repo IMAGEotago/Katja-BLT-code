@@ -76,7 +76,7 @@ _, sim_dual_lr = model_dual_lr.simulate(outcomes=outcomes,
                                             'alpha_n': alpha_n_values},
                                         observation_parameters={
                                             'beta': [3] * int(n_groupA + n_groupB)},
-                                        output_file='example_responses.txt')
+                                        output_file='output_files/example_responses.txt')
 
 #display trace of first subject from each group
 low_alpha_results = model_dual_lr.simulation_results['value'][0:n_outcomes]
