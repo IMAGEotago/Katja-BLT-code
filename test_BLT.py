@@ -32,7 +32,7 @@ beta = Parameter('beta', 'flat', mean=3)
 
 n_subjects = 25
 value_values = [0.5] * n_subjects
-alpha_values = np.random.uniform(0.0, 1.0, n_subjects) 
+alpha_values = np.random.uniform(0.0, 1.0, n_subjects)
 beta_values = [3] * n_subjects #TODO: determine appropriate value/s
 
 # create model
@@ -47,6 +47,7 @@ _, sim_rw = model.simulate(outcomes=outcomes,
                            learning_parameters={'value' : value_values,
                                                 'alpha' : alpha_values},
                            observation_parameters={'beta' : beta_values},
+                           noise_sd=0.2, #add noise
                            return_choices=True)
 #check fitting decisions - check model fits choices
 #implement a beta response model
@@ -71,4 +72,4 @@ plt.ylabel('Estimated value')
 plt.show()
 
 # fit the simulated data and perform parameter recovery
-model.fit(sim_rw, fit_method='MLE', fit_stats=True, recovery=True) #TODO: value for fit_kwargs?
+model.fit(sim_rw, fit_method='MLE', fit_stats=True, recovery=True)
