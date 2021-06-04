@@ -13,14 +13,14 @@ import os
 
 # open matlab file
 fileDir = os.path.dirname(os.path.realpath('__file__'))
-mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat') #edit filepath
+mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
 mat_file = os.path.abspath(os.path.realpath(mat_file))
 
 mat_contents = sio.loadmat(mat_file) #reads matlab variables into python dict
 
 params = mat_contents['params'][0][0]
 
-outcomes = np.array(params[10]).reshape(len(params[10])) #check right one, could be at 7
+outcomes = np.array(params[10]).reshape(len(params[10])) #pairings from matlab file
 
 n_outcomes = len(outcomes)
 
@@ -28,17 +28,18 @@ n_outcomes = len(outcomes)
 # set parameters
 value = Parameter('value', 'fixed', mean=0.5, dynamic=True)
 alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
-beta = Parameter('beta', 'flat', mean=3)
+beta = Parameter('beta', 'flat', mean=1.5)
 
 n_subjects = 25
 value_values = [0.5] * n_subjects
 alpha_values = np.random.uniform(0.0, 1.0, n_subjects)
-beta_values = [3] * n_subjects #TODO: determine appropriate value/s
+beta_values = [1.5] * n_subjects #TODO: determine appropriate value/s
 
 # create model
 # learning model is rescorla_wagner model with parameter alpha
 # observation model is softmax with parameter beta
 model = DMModel(rescorla_wagner,[value, alpha], softmax, [beta], logp_function='bernoulli')
+#model = DMModel(rescorla_wagner,[value, alpha], None, None, logp_function='beta')
 
 # simulate data for parameter recovery
 _, sim_rw = model.simulate(outcomes=outcomes,
@@ -47,8 +48,9 @@ _, sim_rw = model.simulate(outcomes=outcomes,
                            learning_parameters={'value' : value_values,
                                                 'alpha' : alpha_values},
                            observation_parameters={'beta' : beta_values},
-                           noise_sd=0.2, #add noise
-                           return_choices=True)
+                           noise_sd=0.0, #add noise
+                           return_choices=True,
+                           response_variable='value')
 #check fitting decisions - check model fits choices
 #implement a beta response model
 #add noise
