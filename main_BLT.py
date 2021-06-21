@@ -7,13 +7,18 @@
 import sys
 sys.path.insert(0, 'DMpy/')
 
-import params
-from functions_BLT import define_model
+# fix to deal with theano Exception on certain computers
+import theano
+theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
-print(params.mat_file)
+import params
+from functions_BLT import define_model, model_simulation
+
+# print(params.mat_file)
+print(params.continuous)
 print(params.outcomes)
 print(params.n_outcomes)
 
-model = define_model(continuous=False)
+model, values = define_model(continuous=params.continuous)
 
-# TODO: simulate and recover from model
+model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
