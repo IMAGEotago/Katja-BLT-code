@@ -10,36 +10,22 @@ import scipy.io as sio
 import os
 
 # fix to deal with theano Exception on certain computers
-import theano
-theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
+# import theano
+# theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 
 # import data
 
-# # open matlab file
-# fileDir = os.path.dirname(os.path.realpath('__file__'))
-# mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
-# mat_file = os.path.abspath(os.path.realpath(mat_file))
-#
-# mat_contents = sio.loadmat(mat_file) #reads matlab variables into python dict
-#
-# params = mat_contents['params'][0][0]
-#
-#outcomes = np.array(params[10]).reshape(len(params[10])) #pairings from matlab file
-outcomes = np.array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.,
-                     0., 1., 1., 1., 0., 0., 1., 1., 1., 0., 0., 0., 1., 0., 0.,
-                     0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 0., 1., 1.,
-                     0., 0., 0., 1., 1., 0., 1., 1., 1., 1., 1., 1., 1., 1., 0.,
-                     1., 1., 0., 0., 1., 0., 1., 0., 0., 0., 0., 1., 0., 1., 1.,
-                     1., 1., 1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                     0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 1., 0.,
-                     1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0., 1., 1., 1.,
-                     0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 1., 0., 0., 1., 1.,
-                     0., 0., 1., 1., 1., 1., 1., 0., 1., 1., 0., 0., 0., 1., 0.,
-                     0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 1., 0., 1.,
-                     1., 1., 0., 0., 1., 1., 1., 0., 1., 0., 1., 1., 0., 1., 1.,
-                     0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.,
-                     0., 0., 0., 0., 1.])
+# open matlab file
+fileDir = os.path.dirname(os.path.realpath('__file__'))
+mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
+mat_file = os.path.abspath(os.path.realpath(mat_file))
+
+mat_contents = sio.loadmat(mat_file) #reads matlab variables into python dict
+
+params = mat_contents['params'][0][0]
+
+outcomes = np.array(params[10]).reshape(len(params[10])) #pairings from matlab file
 
 n_outcomes = len(outcomes)
 
