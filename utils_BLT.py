@@ -5,6 +5,7 @@
     Description: This contains various functions used by main_BLT.py, models_BLT.py etc.
 """
 import numpy as np
+import pandas as pd
 import scipy.io as sio
 
 def get_BLT_data(filepath, subID):
@@ -26,5 +27,9 @@ def get_BLT_data(filepath, subID):
     # extract subject responses
     m_data = contents['data'][0][0]
     responses = np.array(m_data[1]).reshape(len(m_data[1]))
+
+    subIDs = np.full((len(outcomes),0), subID)
+
+    df = pd.DataFrame('Outcome':outcomes, 'Response':responses, 'Subject':subIDs) #TODO: check this
 
     #TODO: put outcomes, responses and subID into a .csv file, return file
