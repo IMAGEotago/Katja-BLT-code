@@ -12,7 +12,7 @@ sys.path.insert(0, 'DMpy/')
 # theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 import params
-from functions_BLT import define_model, model_simulation
+from models_BLT import define_model, model_simulation
 
 # print type of model, number of subjects and trials
 if params.continuous:
