@@ -60,7 +60,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     if continuous:
         _, sim_rw = model.simulate(outcomes=outcomes,
                                    n_subjects=n_subjects,
-                                   output_file='output_files/test_blt_responses.csv',
+                                   output_file='output_files/test_blt_responses.csv', #TODO: get output_file from params?
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
                                    noise_sd=0.0, #TODO: add params variable for noise
