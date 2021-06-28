@@ -15,7 +15,7 @@ import os
 import scipy.io as sio
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
-continuous = False
+continuous = True
 
 # mat_file stores the filepath to the .mat file containing the relevant data
 # TODO: change to relevant filepath as needed
@@ -24,6 +24,7 @@ mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130
 mat_file = os.path.abspath(os.path.realpath(mat_file))
 
 # outcomes stores the list of trial outcomes as an np.array
+# TODO: change to get outcomes using get_BLT_data() function from utils_BLT
 mat_contents = sio.loadmat(mat_file)
 params = mat_contents['params'][0][0]
 outcomes = np.array(params[10]).reshape(len(params[10]))
