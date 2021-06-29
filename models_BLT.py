@@ -11,7 +11,7 @@ from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes
+from params import n_subjects, outcomes, n_outcomes, sim_path, fit_method
 
 
 def define_model(continuous=False):
@@ -60,7 +60,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     if continuous:
         _, sim_rw = model.simulate(outcomes=outcomes,
                                    n_subjects=n_subjects,
-                                   output_file='output_files/test_blt_responses.csv', #TODO: get output_file from params?
+                                   output_file=sim_path,
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
                                    noise_sd=0.0, #TODO: add params variable for noise
@@ -69,7 +69,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     else:
         _, sim_rw = model.simulate(outcomes=outcomes,
                                    n_subjects=n_subjects,
-                                   output_file='output_files/test_blt_responses.csv',
+                                   output_file=sim_path,
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
                                    observation_parameters={'beta' : values["beta"]},
@@ -81,6 +81,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     if sim_plot:
         x = np.arange(n_outcomes)
 
+        # TODO: change to plot all simulation results instead of first three
         a1 = model.simulation_results['alpha_sim'][0]
         a2 = model.simulation_results['alpha_sim'][n_outcomes]
         a3 = model.simulation_results['alpha_sim'][2*n_outcomes]
@@ -97,4 +98,4 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
 
     # Perform parameter recovery
     if recover:
-        model.fit(sim_rw, fit_method='MLE', fit_stats=True, recovery=True) #TODO: get fit_method from params
+        model.fit(sim_rw, fit_method=fit_method, fit_stats=True, recovery=True)

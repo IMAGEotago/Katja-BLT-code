@@ -5,11 +5,13 @@
     Description: This contains the parameters used by main_BLT.py.
                  Parameters defined in this file:
                  - continuous: determines whether model is continuous
-                 - mat_file: filepath to the data file
-                 - data_path: path to csv file containing data for model fitting
+                 - sim_path: filepath where results from simulation are written to
+                 - mat_file: filepath to the matlab data file
+                 - data_path: filepath to csv file containing data for model fitting
                  - outcomes: numpy array of trial outcomes
                  - n_outcomes: number of outcomes (also number of trials)
                  - n_subjects: number of subjects to be simulated
+                 - fit_method: method to be used for model fitting
 """
 import numpy as np
 import os
@@ -18,6 +20,9 @@ from utils_BLT import get_BLT_data
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
 continuous = False
+
+# sim_path stores the filepath where results from simulation are written to
+sim_path = 'output_files/test_blt_responses.csv'
 
 # mat_file stores the filepath to the .mat file containing the relevant data
 # TODO: change to relevant filepath as needed
@@ -36,3 +41,6 @@ n_outcomes = len(outcomes)
 
 # n_subjects stores the number of subjects to be simulated
 n_subjects = 25
+
+# fit_method stores the method to be used for model Fitting
+fit_method = 'MLE'

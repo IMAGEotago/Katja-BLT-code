@@ -22,8 +22,7 @@ else:
 
 model, values = define_model(continuous=params.continuous)
 
-model_simulation(model, values, continuous=params.continuous, recover=False, sim_plot=True)
+model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
 
 # call function for fitting model to real data
-# TODO: perhaps move into seperate function? Get fit_method from params
-model.fit(params.data_path, fit_method='MLE', fit_stats=True, recovery=False)
+model.fit(params.data_path, fit_method=params.fit_method, fit_stats=True, recovery=False)
