@@ -8,15 +8,15 @@ import numpy as np
 import pandas as pd
 import scipy.io as sio
 
-def get_BLT_data(input_path, output_path, subID):
+def get_BLT_data(input_path, output_path, subID, continuous=True):
     """
         Converts matlab file and extracts outcomes and response data for model fitting.
         Arguments:
             input_path: the filepath to the matlab file containing the data
             output_path: the filepath where the .csv file will be stored
             subID: the subject ID corresponding to the data
+            continuous: if False, data will be binarised (default is True)
         Returns:
-            data: .csv file containing properly formatted data for model fitting
             outcomes: a numpy array containing the outcomes from the experiment
     """
     # get contents from matlab file
@@ -30,12 +30,18 @@ def get_BLT_data(input_path, output_path, subID):
     m_data = contents['data'][0][0]
     responses = np.array(m_data[1]).reshape(len(m_data[1][0])) / 100
 
+    # binarise data if required
+    if not continuous:
+        for i in range(len(responses)):
+            if responses[i] >= 0.5:
+                responses[i] = 1
+            else:
+                responses[i] = 0
+
     subIDs = np.full((len(outcomes)), subID)
 
     # combine outcomes, responses, and subject ID into a dataframe, convert to csv file
     df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':subIDs})
-    data = df.to_csv(output_path, index=False)
+    df.to_csv(output_path, index=False)
 
-    return data, outcomes
-
-    #TODO: put outcomes, responses and subID into a .csv file, return file
+    return outcomes
