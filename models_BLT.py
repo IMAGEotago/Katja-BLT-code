@@ -90,18 +90,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
             a[i] = model.simulation_results['alpha_sim'][n]
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.coolwarm(a[i]/3), alpha=0.5)
 
-        # #code to plot first three subject results only
-        # a1 = model.simulation_results['alpha_sim'][0]
-        # a2 = model.simulation_results['alpha_sim'][n_outcomes]
-        # a3 = model.simulation_results['alpha_sim'][2*n_outcomes]
-        #
-        # plt.figure(figsize=(15, 3))
-        # plt.plot(x, model.simulation_results['value'][0:n_outcomes], label='alpha_s1 = %.3f' %a1)
-        # plt.plot(x, model.simulation_results['value'][n_outcomes:n_outcomes*2], label='alpha_s2 = %.3f' %a2)
-        # plt.plot(x, model.simulation_results['value'][n_outcomes*2:n_outcomes*3], label='alpha_s3 = %.3f' %a3)
-        
         plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
-        plt.legend()
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
         plt.show()
