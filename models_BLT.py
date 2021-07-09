@@ -11,7 +11,7 @@ from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, fit_method
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method
 
 
 def define_model(continuous=False):
@@ -63,7 +63,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                    output_file=sim_path,
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
-                                   noise_sd=0.0, #TODO: add params variable for noise
+                                   noise_sd=sim_noise,
                                    return_choices=False,
                                    response_variable='value')
     else:
@@ -73,7 +73,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
                                    observation_parameters={'beta' : values["beta"]},
-                                   noise_sd=0.0, #TODO: add params variable for noise
+                                   noise_sd=sim_noise,
                                    return_choices=True,
                                    response_variable='value')
 

@@ -42,5 +42,8 @@ n_outcomes = len(outcomes)
 # n_subjects stores the number of subjects to be simulated
 n_subjects = 25
 
+# standard deviation of gaussian noise to be used for simulation
+sim_noise = 0.01
+
 # fit_method stores the method to be used for model Fitting
 fit_method = 'MLE'
