@@ -83,7 +83,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
 
         plt.figure(figsize=(15,3))
 
-        # plot results for each subject
+        # Plot results for each subject
         a = np.zeros(n_subjects)
         for i in range(n_subjects):
             n = i*n_outcomes
@@ -91,6 +91,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.coolwarm(a[i]/3), alpha=0.5)
 
         plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
+        plt.title(f'Simulation results for {n_subjects} subjects')
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
         plt.show()
