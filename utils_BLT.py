@@ -26,9 +26,19 @@ def get_BLT_data(input_path, output_path, subID, continuous=True):
     m_params = contents['params'][0][0]
     outcomes = np.array(m_params[10]).reshape(len(m_params[10]))
 
+    # extract cues
+    cues = np.array(m_params[9]).reshape(len(m_params[9]))
+
     # extract subject responses
     m_data = contents['data'][0][0]
     responses = np.array(m_data[1]).reshape(len(m_data[1][0])) / 100
+
+    # match responses to pairings
+    for i in range(len(cues)):
+        if cues[i] == 1:
+            responses[i] = responses[i]
+        else:
+            responses[i] = 1 - responses[i]
 
     # binarise data if required
     if not continuous:
