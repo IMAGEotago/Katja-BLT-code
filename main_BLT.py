@@ -12,7 +12,7 @@ sys.path.insert(0, 'DMpy/')
 # theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 import params
-from models_BLT import define_model, model_simulation
+from models_BLT import define_model, model_simulation, fit_model
 
 # print type of model, number of subjects and trials
 if params.continuous:
@@ -25,4 +25,4 @@ model, values = define_model(continuous=params.continuous)
 model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
 
 # call function for fitting model to real data
-model.fit(params.data_path, fit_method=params.fit_method, fit_stats=True, recovery=False)
+fit_model(model, plot=True)

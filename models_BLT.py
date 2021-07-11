@@ -11,7 +11,7 @@ from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method, data_path
 
 
 def define_model(continuous=False):
@@ -99,3 +99,20 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     # Perform parameter recovery
     if recover:
         model.fit(sim_rw, fit_method=fit_method, fit_stats=True, recovery=True)
+
+def fit_model(model, plot=True):
+    """
+        Fits the model to real data, and provides a simulated plot of the fitted alpha value/s.
+        Arguments:
+            model: the model to be used for fitting the data
+            plot: if True, will plot the simulated behaviour from the fitted alpha value/s
+    """
+    # Fits the data
+    model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False)
+
+    # Plots the fitted alpha values
+    if plot:
+        alpha = model.parameter_table["alpha"]
+        print(alpha)
+        print(alpha.shape)
+        # TODO: call simulate method using fitted alpha value/s
