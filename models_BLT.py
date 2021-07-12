@@ -100,11 +100,12 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
     if recover:
         model.fit(sim_rw, fit_method=fit_method, fit_stats=True, recovery=True)
 
-def fit_model(model, plot=True):
+def fit_model(model, continuous=False, plot=True):
     """
         Fits the model to real data, and provides a simulated plot of the fitted alpha value/s.
         Arguments:
             model: the model to be used for fitting the data
+            continuous: whether model is continuous (True) or binary (False)
             plot: if True, will plot the simulated behaviour from the fitted alpha value/s
     """
     # Fits the data
@@ -113,6 +114,41 @@ def fit_model(model, plot=True):
     # Plots the fitted alpha values
     if plot:
         alpha = model.parameter_table["alpha"]
-        print(alpha)
-        print(alpha.shape)
-        # TODO: call simulate method using fitted alpha value/s
+        n_alpha = len(alpha)
+
+        # Simulate with fitted alpha values
+        # TODO: this part is still buggy
+        if continuous:
+            _, sim_a = model.simulate(outcomes=outcomes,
+                                      n_subjects=n_alpha,
+                                      output_file='output_files/sim_fit_responses', #TODO: move to params?
+                                      learning_parameters={'value' : [0.5]*n_alpha,
+                                                           'alpha' : alpha},
+                                      return_choices=False,
+                                      response_variable='value')
+        else:
+            _, sim_a = model.simulate(outcomes=outcomes,
+                                      n_subjects=n_alpha,
+                                      output_file='output_files/sim_fit_responses', #TODO: move to params?
+                                      learning_parameters={'value' : [0.5]*n_alpha,
+                                                           'alpha' : alpha},
+                                      observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
+                                      return_choices=True,
+                                      response_variable='value')
+
+        x = np.arange(n_outcomes)
+        plt.figure(figsize=(15,3))
+
+        # Plot simulated behaviour for each subject
+        a = np.zeros(n_alpha)
+        for i in range(n_alpha):
+            n = i*n_outcomes
+            a[i] = model.simulation_results['alpha_sim'][n]
+            plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.twilight(a[i]/3), alpha=0.5,
+                     label='alpha = %.3f' %a[i])
+
+        plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
+        plt.title(f'Simulated behaviour for fitted alpha values')
+        plt.xlabel('Trial')
+        plt.ylabel('Estimated value')
+        plt.show()
