@@ -113,26 +113,25 @@ def fit_model(model, continuous=False, plot=True):
 
     # Plots the fitted alpha values
     if plot:
-        alpha = model.parameter_table["alpha"]
-        n_alpha = len(alpha)
+        alpha_vals = model.parameter_table["alpha"]
+        n_alpha = len(alpha_vals)
 
         # Simulate with fitted alpha values
-        # TODO: this part is still buggy
+        # TODO: this part is still buggy - maybe simulating twice for same model doesn't work?
         if continuous:
             _, sim_a = model.simulate(outcomes=outcomes,
                                       n_subjects=n_alpha,
                                       output_file='output_files/sim_fit_responses', #TODO: move to params?
                                       learning_parameters={'value' : [0.5]*n_alpha,
-                                                           'alpha' : alpha},
+                                                           'alpha' : alpha_vals},
                                       return_choices=False,
                                       response_variable='value')
         else:
+            print("hello")
             _, sim_a = model.simulate(outcomes=outcomes,
-                                      n_subjects=n_alpha,
-                                      output_file='output_files/sim_fit_responses', #TODO: move to params?
-                                      learning_parameters={'value' : [0.5]*n_alpha,
-                                                           'alpha' : alpha},
-                                      observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
+                                      learning_parameters={'value' : 0.5,
+                                                           'alpha' : 0.233635},
+                                      observation_parameters={'beta' : 1.5}, #TODO: get beta from params?
                                       return_choices=True,
                                       response_variable='value')
 
@@ -144,11 +143,12 @@ def fit_model(model, continuous=False, plot=True):
         for i in range(n_alpha):
             n = i*n_outcomes
             a[i] = model.simulation_results['alpha_sim'][n]
-            plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.twilight(a[i]/3), alpha=0.5,
+            plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.hot(a[i]/3), alpha=0.5,
                      label='alpha = %.3f' %a[i])
 
         plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
         plt.title(f'Simulated behaviour for fitted alpha values')
+        plt.legend()
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
         plt.show()
