@@ -65,6 +65,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                                         'alpha' : values["alpha"]},
                                    noise_sd=sim_noise,
                                    return_choices=False,
+                                   combinations=False,
                                    response_variable='value')
     else:
         _, sim_rw = model.simulate(outcomes=outcomes,
@@ -75,6 +76,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                    observation_parameters={'beta' : values["beta"]},
                                    noise_sd=sim_noise,
                                    return_choices=True,
+                                   combinations=False,
                                    response_variable='value')
 
     # Plot results from simulation
@@ -108,30 +110,30 @@ def fit_model(model, continuous=False, plot=True):
             continuous: whether model is continuous (True) or binary (False)
             plot: if True, will plot the simulated behaviour from the fitted alpha value/s
     """
+
     # Fits the data
     model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False)
 
     # Plots the fitted alpha values
     if plot:
-        alpha_vals = model.parameter_table["alpha"]
+        alpha_vals = np.array(model.parameter_table["alpha"])
+        alpha_vals = np.tile(alpha_vals, 2) # TODO: simulate does not work with <2 subjects/alpha values
         n_alpha = len(alpha_vals)
 
         # Simulate with fitted alpha values
-        # TODO: this part is still buggy - maybe simulating twice for same model doesn't work?
+        model.fit_complete = False # Required to avoid theano exception
         if continuous:
             _, sim_a = model.simulate(outcomes=outcomes,
                                       n_subjects=n_alpha,
-                                      output_file='output_files/sim_fit_responses', #TODO: move to params?
                                       learning_parameters={'value' : [0.5]*n_alpha,
                                                            'alpha' : alpha_vals},
                                       return_choices=False,
                                       response_variable='value')
         else:
-            print("hello")
             _, sim_a = model.simulate(outcomes=outcomes,
-                                      learning_parameters={'value' : 0.5,
-                                                           'alpha' : 0.233635},
-                                      observation_parameters={'beta' : 1.5}, #TODO: get beta from params?
+                                      learning_parameters={'value' : [0.5]*n_alpha,
+                                                           'alpha' : alpha_vals},
+                                      observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
                                       return_choices=True,
                                       response_variable='value')
 
