@@ -131,6 +131,7 @@ def fit_model(model, continuous=False, plot=True):
                                       response_variable='value')
         else:
             _, sim_a = model.simulate(outcomes=outcomes,
+                                      n_subjects=n_alpha,
                                       learning_parameters={'value' : [0.5]*n_alpha,
                                                            'alpha' : alpha_vals},
                                       observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
