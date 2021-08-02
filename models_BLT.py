@@ -117,7 +117,10 @@ def fit_model(model, continuous=False, plot=True):
     # Plots the fitted alpha values
     if plot:
         alpha_vals = np.array(model.parameter_table["alpha"])
-        alpha_vals = np.tile(alpha_vals, 2) # TODO: simulate does not work with <2 subjects/alpha values
+
+        # make sure there are at least 2 alpha values
+        if len(alpha_vals) == 1:
+            alpha_vals = np.tile(alpha_vals, 2)
         n_alpha = len(alpha_vals)
 
         # Simulate with fitted alpha values
