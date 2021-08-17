@@ -11,6 +11,8 @@
                  - outcomes: numpy array of trial outcomes
                  - n_outcomes: number of outcomes (also number of trials)
                  - n_subjects: number of subjects to be simulated
+                 - sim_noise: standard deviation of gaussian noise to be used for simulation
+                 - beta: beta value to be used for binary model
                  - fit_method: method to be used for model fitting
 """
 import numpy as np
@@ -19,7 +21,7 @@ import os
 from utils_BLT import get_BLT_data
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
-continuous = False
+continuous = True
 
 # sim_path stores the filepath where results from simulation are written to
 sim_path = 'output_files/test_blt_responses.csv'
@@ -40,10 +42,13 @@ outcomes = get_BLT_data(mat_file, data_path, 1, continuous)
 n_outcomes = len(outcomes)
 
 # n_subjects stores the number of subjects to be simulated
-n_subjects = 25
+n_subjects = 500
 
 # standard deviation of gaussian noise to be used for simulation
-sim_noise = 0.01
+sim_noise = 0.1
+
+# beta value to be used for binary model
+beta = 1
 
 # fit_method stores the method to be used for model Fitting
 fit_method = 'MLE'

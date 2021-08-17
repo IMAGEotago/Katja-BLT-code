@@ -25,4 +25,4 @@ model, values = define_model(continuous=params.continuous)
 model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
 
 # call function for fitting model to real data
-fit_model(model, continuous=params.continuous, plot=True)
+#fit_model(model, continuous=params.continuous, plot=True)
