@@ -11,7 +11,7 @@ from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method, data_path, beta
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method, data_path, beta_val
 
 
 def define_model(continuous=False):
@@ -35,7 +35,7 @@ def define_model(continuous=False):
 
     if not continuous:
         beta = Parameter('beta', 'flat', mean=1.5)
-        values["beta"] = [beta] * n_subjects
+        values["beta"] = [beta_val] * n_subjects
 
     # create model instance
     if continuous:
