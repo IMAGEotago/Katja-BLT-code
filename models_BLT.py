@@ -74,7 +74,6 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                    learning_parameters={'value' : values["value"],
                                                         'alpha' : values["alpha"]},
                                    observation_parameters={'beta' : values["beta"]},
-                                   noise_sd=sim_noise,
                                    return_choices=True,
                                    combinations=False,
                                    response_variable='value')
