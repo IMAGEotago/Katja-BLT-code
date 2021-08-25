@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 import scipy.io as sio
 
+from scipy.stats.distributions import chi2
+
 def get_BLT_data(input_path, output_path, subID, continuous=True):
     """
         Converts matlab file and extracts outcomes and response data for model fitting.
@@ -55,3 +57,17 @@ def get_BLT_data(input_path, output_path, subID, continuous=True):
     df.to_csv(output_path, index=False)
 
     return outcomes
+
+def likelihood_ratio(llmin, llmax):
+    """
+        Calculates the likelihood ratio given the log likelihoods, and subsequent p-value.
+        Arguments:
+            llmin: log likelihood #1
+            llmax: log likelihood #2
+        Returns:
+            lr: the likelihood ratio
+            p: the p-value of the likelihood ratio 
+    """
+    lr = 2*(llmax-llmin)
+    p = chi2.sf(lr, 1)
+    return lr, p
