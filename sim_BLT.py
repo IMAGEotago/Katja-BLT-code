@@ -15,73 +15,95 @@ import os
 import params
 from models_BLT import define_model, model_simulation
 
-# save all output to text file
+# get current file path
 fileDir = os.path.dirname(os.path.realpath('__file__'))
-file_path = ""
-if params.continuous:
-    file_path = os.path.join(fileDir, "../sim_results/continuous")
-    text_path = os.path.join(file_path, f"con_n{params.sim_noise*100}_log.txt")
-else:
-    file_path = os.path.join(fileDir, "../sim_results/binary")
-    text_path = os.path.join(file_path, f"bin_b{params.beta_val}_log.txt")
 
-default_stdout = sys.stdout
-sys.stdout = open(text_path, "w")
+# repeat each run 10 times
+repeat = 10
+run = 1
 
-# print relevant model parameters
-if params.continuous:
-    print(f"Running continuous model with {params.n_subjects} subjects and {params.n_outcomes} trials")
-    print(f"Noise SD: {params.sim_noise}")
-else:
-    print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials")
-    print(f"Beta: {params.beta_val}")
+# number of plots produced in one run
+n_plots = 4
 
-# create model
-model, values = define_model(continuous=params.continuous)
-
-# run simulation and parameter recovery
-model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
-
-#msave plots
-figs = [plt.figure(n) for n in plt.get_fignums()]
-n = 1
-for fig in figs:
+while run <= repeat:
+    # checkpoint
     if params.continuous:
-        fig_name = f"con_n{params.sim_noise*100}_f{n}"
+        print(f"Continuous model run {run} with noise {params.sim_noise}")
     else:
-        fig_name = f"bin_b{params.beta_val}_f{n}"
+        print(f"Binary model run {run} with beta {params.beta_val}")
 
-    fig_path = os.path.join(file_path, f"{fig_name}.png")
-    fig.savefig(fig_path)
-    n = n+1
+    # save all output to text file
+    file_path = ""
+    n = int(params.sim_noise*100)
+    if params.continuous:
+        file_path = os.path.join(fileDir, f"../sim_results/continuous/noise_{n}/run_{run}")
+        text_path = os.path.join(file_path, f"con_n{n}_log.txt")
+    else:
+        file_path = os.path.join(fileDir, f"../sim_results/binary/beta_{params.beta_val}/run_{run}")
+        text_path = os.path.join(file_path, f"bin_b{params.beta_val}_log.txt")
 
-# print estimated beta mean + sd
-beta_column = model.parameter_table.loc[:,"beta"]
-beta_values = beta_column.values
-print(f"\n \nMean est. beta: {np.mean(beta_values)}")
-print(f"Std est. beta: {np.std(beta_values)}")
+    default_stdout = sys.stdout
+    sys.stdout = open(text_path, "w")
 
-alpha_column = model.parameter_table.loc[:,"alpha"]
-alpha_values = alpha_column.values
+    # print relevant model parameters
+    if params.continuous:
+        print(f"Running continuous model with {params.n_subjects} subjects and {params.n_outcomes} trials")
+        print(f"Noise SD: {params.sim_noise}")
+    else:
+        print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials")
+        print(f"Beta: {params.beta_val}")
 
-print("\n \nBeta values:")
-print(beta_values)
-print("\n \nAlpha values:")
-print(alpha_values)
-# Save estimated parameter values to file
-# TODO: only saves first line
-# if params.continuous:
-#     param_path = os.path.join(file_path, f"con_n{params.sim_noise*100}_params.txt")
-# else:
-#     param_path = os.path.join(file_path, f"bin_b{params.beta_val}_params.txt")
-#
-# with open(param_path, "w") as f:
-#     f.write(f"Mean est. beta: {np.mean(beta_values)}            Std est. beta: {np.std(beta_values)} \n")
-#     f.write(beta_values)
-#
-#     f.write("\n \n Alpha values:")
-#     f.write(alpha_values)
+    # create model
+    model, values = define_model(continuous=params.continuous)
 
-# close file
-sys.stdout.close()
-sys.stdout = default_stdout
+    # run simulation and parameter recovery
+    model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
+
+    # save plots
+    figs = [plt.figure(n) for n in plt.get_fignums()[-n_plots:]]
+    i = 1
+    for fig in figs:
+        if params.continuous:
+            fig_name = f"con_n{n}_f{i}"
+        else:
+            fig_name = f"bin_b{params.beta_val}_f{i}"
+
+        fig_path = os.path.join(file_path, f"{fig_name}.png")
+        fig.savefig(fig_path)
+        i = i+1
+
+    # get alpha and beta values
+    if not params.continuous:
+        beta_column = model.parameter_table.loc[:,"beta"]
+        beta_values = beta_column.values
+
+    alpha_column = model.parameter_table.loc[:,"alpha"]
+    alpha_values = alpha_column.values
+
+    # Save estimated parameter values to file
+    # TODO: only saves first line
+    if params.continuous:
+        param_path = os.path.join(file_path, f"con_n{n}_params.txt")
+    else:
+        param_path = os.path.join(file_path, f"bin_b{params.beta_val}_params.txt")
+
+    with open(param_path, "w") as f:
+        if not params.continuous:
+            f.write(f"Mean est. beta: {np.mean(beta_values)} \nStd est. beta: {np.std(beta_values)} \n")
+            f.write("\nBeta values:\n")
+            f.write(f"\n{beta_values}\n \n")
+
+        f.write("Alpha values:\n")
+        f.write(f"\n{alpha_values}")
+
+    # close file
+    sys.stdout.close()
+    sys.stdout = default_stdout
+
+    # close all matplotlib plots
+    plt.close('all')
+    
+    # increment
+    run = run + 1
+
+print("Finished")
