@@ -34,7 +34,7 @@ def define_model(continuous=False):
     values["alpha"] = np.random.uniform(0.0, 1.0, n_subjects)
 
     if not continuous:
-        beta = Parameter('beta', 'flat', mean=1.5)
+        beta = Parameter('beta', 'flat')
         values["beta"] = [beta_val] * n_subjects
 
     # create model instance
@@ -99,7 +99,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
 
     # Perform parameter recovery
     if recover:
-        model.fit(sim_rw, fit_method=fit_method, fit_stats=True, recovery=True, suppress_table=True)
+        model.fit(sim_rw, fit_method=fit_method, fit_stats=True, recovery=True, suppress_table=False)
 
 def fit_model(model, continuous=False, plot=True):
     """

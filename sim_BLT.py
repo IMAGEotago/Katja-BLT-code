@@ -80,6 +80,9 @@ while run <= repeat:
     alpha_column = model.parameter_table.loc[:,"alpha"]
     alpha_values = alpha_column.values
 
+    alpha_sim_col = model.parameter_table.loc[:,"alpha_sim"]
+    alpha_sim_vals = alpha_sim_col.values
+
     # Save estimated parameter values to file
     # TODO: only saves first line
     if params.continuous:
@@ -93,8 +96,10 @@ while run <= repeat:
             f.write("\nBeta values:\n")
             f.write(f"\n{beta_values}\n \n")
 
-        f.write("Alpha values:\n")
-        f.write(f"\n{alpha_values}")
+        f.write("Estimated alpha values:\n")
+        f.write(f"\n{alpha_values}\n \n")
+        f.write("Simulated alpha values:\n")
+        f.write(f"\n{alpha_sim_vals}")
 
     # close file
     sys.stdout.close()
@@ -102,7 +107,7 @@ while run <= repeat:
 
     # close all matplotlib plots
     plt.close('all')
-    
+
     # increment
     run = run + 1
 
