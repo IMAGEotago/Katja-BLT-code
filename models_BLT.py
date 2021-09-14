@@ -76,7 +76,7 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
                                    observation_parameters={'beta' : values["beta"]},
                                    return_choices=True,
                                    combinations=False,
-                                   response_variable='value')
+                                   response_variable='prob')
 
     # Plot results from simulation
     if sim_plot:
@@ -138,7 +138,7 @@ def fit_model(model, continuous=False, plot=True):
                                                            'alpha' : alpha_vals},
                                       observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
                                       return_choices=True,
-                                      response_variable='value')
+                                      response_variable='prob')
 
         x = np.arange(n_outcomes)
         plt.figure(figsize=(15,3))
