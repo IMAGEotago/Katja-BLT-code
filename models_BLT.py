@@ -24,7 +24,6 @@ def define_model(continuous=False):
             values: dictionary containing the values for the initialised parameters
     """
     # initialise parameters
-    # TODO: adjust so means/bounds are not hard-coded
     value = Parameter('value', 'fixed', mean=0.5, dynamic=True)
     alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
 
@@ -149,7 +148,7 @@ def fit_model(model, continuous=False, plot=True):
             n = i*n_outcomes
             a[i] = model.simulation_results['alpha_sim'][n]
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.plasma(a[i]), alpha=0.5,
-                     label=f"Subject {subjects[i].id};    alpha = {np.round(a[i],3)}") #TODO: put subID in label
+                     label=f"Subject {subjects[i].id};    alpha = {np.round(a[i],3)}")
 
         plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
         plt.title(f"Simulated behaviour for fitted alpha values for {len(subjects)} participants")

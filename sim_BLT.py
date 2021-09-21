@@ -84,7 +84,6 @@ while run <= repeat:
     alpha_sim_vals = alpha_sim_col.values
 
     # Save estimated parameter values to file
-    # TODO: only saves first line
     if params.continuous:
         param_path = os.path.join(file_path, f"con_n{n}_params.txt")
     else:

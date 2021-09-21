@@ -25,7 +25,6 @@ def get_BLT_data(input_path, subID, continuous=True):
         Converts matlab file and extracts outcomes and response data for model fitting.
         Arguments:
             input_path: the filepath to the matlab file containing the data
-            output_path: the filepath where the .csv file will be stored
             subID: the subject ID corresponding to the data
             continuous: if False, data will be binarised (default is True)
         Returns:
@@ -75,7 +74,6 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     # combine outcomes, responses, and subject ID into a dataframe, convert to csv file
     df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':subIDs})
-    #df.to_csv(output_path, index=False)
 
     return df, outcomes
 
