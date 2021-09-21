@@ -10,7 +10,17 @@ import scipy.io as sio
 
 from scipy.stats.distributions import chi2
 
-def get_BLT_data(input_path, output_path, subID, continuous=True):
+class Subject:
+    """
+        Represents each subject used for model fitting.
+        Each subject has an ID number, dataframe containing responses, and an array of outcomes.
+    """
+    def __init__(self, id, df, outcomes):
+        self.id = id
+        self.df = df
+        self.outcomes = outcomes
+
+def get_BLT_data(input_path, subID, continuous=True):
     """
         Converts matlab file and extracts outcomes and response data for model fitting.
         Arguments:
@@ -19,6 +29,7 @@ def get_BLT_data(input_path, output_path, subID, continuous=True):
             subID: the subject ID corresponding to the data
             continuous: if False, data will be binarised (default is True)
         Returns:
+            df: pandas dataframe containing the outcomes, responses, and subject ID
             outcomes: a numpy array containing the outcomes from the experiment
     """
     # get contents from matlab file
@@ -42,21 +53,31 @@ def get_BLT_data(input_path, output_path, subID, continuous=True):
         else:
             responses[i] = 1 - responses[i]
 
+    # check number of NaN responses
+    if np.count_nonzero(np.isnan(responses)) > 0:
+        print(f"Warning: subject {subID} has {np.count_nonzero(np.isnan(responses))} NaN response(s)")
+
     # binarise data if required
     if not continuous:
         for i in range(len(responses)):
-            if responses[i] >= 0.5:
+            if responses[i] == 999:
+                responses[i] = np.nan
+            elif responses[i] >= 0.5:
                 responses[i] = 1
             else:
                 responses[i] = 0
+    else:
+        for i in range(len(responses)):
+            if responses[i] == 999:
+                responses[i] = 0.5
 
     subIDs = np.full((len(outcomes)), subID)
 
     # combine outcomes, responses, and subject ID into a dataframe, convert to csv file
     df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':subIDs})
-    df.to_csv(output_path, index=False)
+    #df.to_csv(output_path, index=False)
 
-    return outcomes
+    return df, outcomes
 
 def likelihood_ratio(llmin, llmax):
     """
@@ -66,7 +87,7 @@ def likelihood_ratio(llmin, llmax):
             llmax: log likelihood #2
         Returns:
             lr: the likelihood ratio
-            p: the p-value of the likelihood ratio 
+            p: the p-value of the likelihood ratio
     """
     lr = 2*(llmax-llmin)
     p = chi2.sf(lr, 1)

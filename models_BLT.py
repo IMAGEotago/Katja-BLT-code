@@ -11,7 +11,7 @@ from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, fit_method, data_path, beta_val
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects
 
 
 def define_model(continuous=False):
@@ -136,7 +136,7 @@ def fit_model(model, continuous=False, plot=True):
                                       n_subjects=n_alpha,
                                       learning_parameters={'value' : [0.5]*n_alpha,
                                                            'alpha' : alpha_vals},
-                                      observation_parameters={'beta' : [1.5]*n_alpha}, #TODO: get beta from params?
+                                      observation_parameters={'beta' : [beta_val]*n_alpha},
                                       return_choices=True,
                                       response_variable='prob')
 
@@ -148,11 +148,11 @@ def fit_model(model, continuous=False, plot=True):
         for i in range(n_alpha):
             n = i*n_outcomes
             a[i] = model.simulation_results['alpha_sim'][n]
-            plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.hot(a[i]/3), alpha=0.5,
-                     label='alpha = %.3f' %a[i])
+            plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.plasma(a[i]), alpha=0.5,
+                     label=f"Subject {subjects[i].id};    alpha = {np.round(a[i],3)}") #TODO: put subID in label
 
         plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
-        plt.title(f'Simulated behaviour for fitted alpha values')
+        plt.title(f"Simulated behaviour for fitted alpha values for {len(subjects)} participants")
         plt.legend()
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
