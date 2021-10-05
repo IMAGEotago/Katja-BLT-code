@@ -26,7 +26,7 @@ from utils_BLT import Subject, get_BLT_data
 continuous = True
 
 # subject ID
-subID = ['0001', '0002', '0003', '0004', '0005', '0007', '0008', '0009', '0010', 
+subID = ['0001', '0002', '0003', '0004', '0005', '0007', '0008', '0009', '0010',
         '0011', '0012', '0013', '0014', '0015', '0016']
 
 # sim_path stores the filepath where results from simulation are written to
@@ -70,4 +70,4 @@ sim_noise = 0.2
 beta_val = 5
 
 # fit_method stores the method to be used for model Fitting
-fit_method = 'MLE'
+fit_method = 'MAP'

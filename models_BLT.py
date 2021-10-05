@@ -25,7 +25,10 @@ def define_model(continuous=False):
     """
     # initialise parameters
     value = Parameter('value', 'fixed', mean=0.5, dynamic=True)
-    alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
+    if fit_method == 'MLE':
+        alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
+    else:
+        alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
 
     # save parameter values in dict
     values = {}
@@ -33,7 +36,10 @@ def define_model(continuous=False):
     values["alpha"] = np.random.uniform(0.0, 1.0, n_subjects)
 
     if not continuous:
-        beta = Parameter('beta', 'flat')
+        if fit_method == 'MLE':
+            beta = Parameter('beta', 'flat')
+        else:
+            beta = Parameter('beta', 'normal', mean=2.14, variance=3.33)
         values["beta"] = [beta_val] * n_subjects
 
     # create model instance
