@@ -29,6 +29,7 @@ def define_model(continuous=False):
         alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
     else:
         alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
+        #alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.9, variance=0.1)
 
     # save parameter values in dict
     values = {}
@@ -162,3 +163,21 @@ def fit_model(model, continuous=False, plot=True):
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
         plt.show()
+
+def plot_trajectories(s):
+    """
+        Plots predictions and outcomes for given subject.
+        Arguments:
+            s: subject to be plotted
+    """
+
+    predictions = s.df.loc[:,'Response']
+    state = [0.8] * 30 + [0.2] * 12 + [0.8] * 13 + [0.2] * 12 + [0.8] * 13
+
+    print(f"Plotting trajectory for participant {s.id}")
+
+    plt.figure(figsize=(15,3))
+    plt.plot(s.outcomes, 'o', state, '-', c='darkred', alpha=0.8)
+    plt.plot(predictions, '-', c='tab:red')
+    plt.title(f"Prediction trajectory for participant {s.id}")
+    plt.show()
