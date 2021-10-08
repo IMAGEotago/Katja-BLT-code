@@ -45,6 +45,13 @@ def get_BLT_data(input_path, subID, continuous=True):
     m_data = contents['data'][0][0]
     responses = np.array(m_data[1]).reshape(len(m_data[1][0])) / 100
 
+    # check responses matches outcomes length
+    if len(responses) != len(outcomes):
+        print("Warning: Subject responses incomplete")
+        n = np.empty(len(outcomes)-len(responses))
+        n[:] = np.nan
+        responses = np.concatenate((responses, n))
+
     # match responses to pairings
     for i in range(len(cues)):
         if cues[i] == 1:
@@ -59,15 +66,15 @@ def get_BLT_data(input_path, subID, continuous=True):
     # binarise data if required
     if not continuous:
         for i in range(len(responses)):
-            if responses[i] == 999:
-                responses[i] = np.nan
-            elif responses[i] >= 0.5:
+            if responses[i] >= 0.5 and responses[i] <= 1.0:
                 responses[i] = 1
-            else:
+            elif responses[i] < 0.5 and responses[i] >= 0.0:
                 responses[i] = 0
+            else:
+                responses[i] = np.nan
     else:
         for i in range(len(responses)):
-            if responses[i] == 999:
+            if responses[i] == 9.99 or responses[i] == -8.99:
                 responses[i] = 0.5
 
     subIDs = np.full((len(outcomes)), subID)
