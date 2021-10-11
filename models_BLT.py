@@ -129,6 +129,7 @@ def fit_model(model, continuous=False, plot=True):
         n_alpha = len(alpha_vals)
 
         # Simulate with fitted alpha values
+        # TODO: sim with fitted beta vals as well
         model.fit_complete = False # Required to avoid theano exception
         if continuous:
             _, sim_a = model.simulate(outcomes=outcomes,
@@ -154,6 +155,7 @@ def fit_model(model, continuous=False, plot=True):
         for i in range(n_alpha):
             n = i*n_outcomes
             a[i] = model.simulation_results['alpha_sim'][n]
+            subjects[i].sim_results = model.simulation_results['value'][n:(n + n_outcomes)]
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.plasma(a[i]), alpha=0.5,
                      label=f"Subject {subjects[i].id};    alpha = {np.round(a[i],3)}")
 
@@ -179,5 +181,6 @@ def plot_trajectories(s):
     plt.figure(figsize=(15,3))
     plt.plot(s.outcomes, 'o', state, '-', c='darkred', alpha=0.8)
     plt.plot(predictions, '-', c='tab:red')
+    plt.plot(np.arange(n_outcomes), s.sim_results, '-', c='coral')
     plt.title(f"Prediction trajectory for participant {s.id}")
     plt.show()
