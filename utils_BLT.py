@@ -15,10 +15,11 @@ class Subject:
         Represents each subject used for model fitting.
         Each subject has an ID number, dataframe containing responses, and an array of outcomes.
     """
-    def __init__(self, id, df, outcomes):
+    def __init__(self, id, df, outcomes, sim_results=None):
         self.id = id
         self.df = df
         self.outcomes = outcomes
+        self.sim_results = sim_results
 
 def get_BLT_data(input_path, subID, continuous=True):
     """
@@ -47,7 +48,7 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     # check responses matches outcomes length
     if len(responses) != len(outcomes):
-        print("Warning: Subject responses incomplete")
+        print(f"Warning: subject {subID} responses incomplete")
         n = np.empty(len(outcomes)-len(responses))
         n[:] = np.nan
         responses = np.concatenate((responses, n))
