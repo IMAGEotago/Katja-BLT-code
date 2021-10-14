@@ -6,6 +6,7 @@
 """
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import pearsonr
 
 from DMpy import DMModel, Parameter
 from DMpy.learning import rescorla_wagner
@@ -139,11 +140,13 @@ def fit_model(model, continuous=False, plot=True):
                                       return_choices=False,
                                       response_variable='value')
         else:
+            beta_vals = np.array(model.parameter_table["beta"])
             _, sim_a = model.simulate(outcomes=outcomes,
                                       n_subjects=n_alpha,
                                       learning_parameters={'value' : [0.5]*n_alpha,
                                                            'alpha' : alpha_vals},
-                                      observation_parameters={'beta' : [beta_val]*n_alpha},
+                                      #observation_parameters={'beta' : [beta_val]*n_alpha},
+                                      observation_parameters={'beta' : beta_vals},
                                       return_choices=True,
                                       response_variable='prob')
 
@@ -176,11 +179,17 @@ def plot_trajectories(s):
     predictions = s.df.loc[:,'Response']
     state = [0.8] * 30 + [0.2] * 12 + [0.8] * 13 + [0.2] * 12 + [0.8] * 13
 
+    # correlation between participant predictions and simulated Predictions
+    predictions = np.nan_to_num(predictions, nan=0.5)
+    r_val, p_val = pearsonr(predictions, s.sim_results)
+
     print(f"Plotting trajectory for participant {s.id}")
+    print(f"R = {np.round(r_val, 6)}, p = {np.round(p_val, 6)}")
 
     plt.figure(figsize=(15,3))
     plt.plot(s.outcomes, 'o', state, '-', c='darkred', alpha=0.8)
-    plt.plot(predictions, '-', c='tab:red')
-    plt.plot(np.arange(n_outcomes), s.sim_results, '-', c='coral')
+    plt.plot(predictions, '-', c='tab:red', label="Predictions")
+    plt.plot(np.arange(n_outcomes), s.sim_results, '-', c='coral', label="Simulated trajectory")
     plt.title(f"Prediction trajectory for participant {s.id}")
+    plt.legend()
     plt.show()
