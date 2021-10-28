@@ -13,6 +13,7 @@ from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
 from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects
+from learning_BLT import dual_lr_rw
 
 
 def define_model(continuous=False):
