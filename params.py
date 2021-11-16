@@ -5,6 +5,7 @@
     Description: This contains the parameters used by main_BLT.py.
                  Parameters defined in this file:
                  - continuous: determines whether model is continuous
+                 - model_type: the learning function to be used for the model
                  - subID: subject ID for data being used
                  - subjects: list of each subject to be used for model fitting
                  - sim_path: filepath to csv file where results from simulation are written to
@@ -20,10 +21,14 @@ import numpy as np
 import os
 import pandas as pd
 
+from learning_BLT import rescorla_wagner, dual_lr_rw
 from utils_BLT import Subject, get_BLT_data
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
 continuous = False
+
+# model_type stores the name of the learning function to be used for the model
+model_type = rescorla_wagner
 
 # subject ID
 subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010',
@@ -43,8 +48,8 @@ for id in subID:
     else: #TODO: put in try/catch loop?
         mat_file = os.path.join(fileDir, f'../../../../OneDrive/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
     mat_file = os.path.abspath(os.path.realpath(mat_file))
-    df, outcomes = get_BLT_data(mat_file, id, continuous)
-    subjects.append(Subject(id, df, outcomes))
+    df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
+    subjects.append(Subject(id, df, outcomes, resist))
 
 # data_path holds filepath to csv file containing data from all subjects for model fitting
 data_path = "output_files/subject_data.csv"

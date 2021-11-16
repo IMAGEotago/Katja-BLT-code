@@ -9,52 +9,70 @@ import numpy as np
 from scipy.stats import pearsonr
 
 from DMpy import DMModel, Parameter
-from DMpy.learning import rescorla_wagner
 from DMpy.observation import softmax
 
 from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects
-from learning_BLT import dual_lr_rw
+from learning_BLT import rescorla_wagner, dual_lr_rw
 
 
-def define_model(continuous=False):
+def define_model(model_type=rescorla_wagner, continuous=False):
     """
-        Initialises parameters and defines the model.
+        Initialises parameters and defines a model.
         Arguments:
+            model_type: the type of learning model to be used (default Rescorla-Wagner).
             continuous: determines whether a binary or contiuous response model is created (default binary)
         Returns:
             model: the initialised model
-            values: dictionary containing the values for the initialised parameters
+            values: dictionary containing the simulation values for the initialised parameters
     """
-    # initialise parameters
+    # initialise value parameter
     value = Parameter('value', 'fixed', mean=0.5, dynamic=True)
-    if fit_method == 'MLE':
-        alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
-    else:
-        alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
-        #alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.9, variance=0.1)
 
-    # save parameter values in dict
-    values = {}
-    values["value"] = [0.5] * n_subjects
-    values["alpha"] = np.random.uniform(0.0, 1.0, n_subjects)
+    # save learning parameter values in dict
+    l_values = {}
+    l_values["value"] = [0.5] * n_subjects
 
+    # initialise other learning parameters
+    if model_type == rescorla_wagner:
+        if fit_method == 'MLE':
+            alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
+        else:
+            alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
+        l_values["alpha"] = np.random.uniform(0.0, 1.0, n_subjects) #TODO: match priors?
+
+    if model_type == dual_lr_rw:
+        alpha_n = Parameter('alpha_n', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
+        alpha_p = Parameter('alpha_p', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
+        l_values["alpha_p"] = np.random.uniform(0.0, 1.0, n_subjects)
+        l_values["alpha_n"] = np.random.uniform(0.0, 1.0, n_subjects)
+
+    # if binary model, create and save observation parameter/s
     if not continuous:
         if fit_method == 'MLE':
             beta = Parameter('beta', 'flat')
         else:
             beta = Parameter('beta', 'normal', mean=2.14, variance=3.33)
-        values["beta"] = [beta_val] * n_subjects
+        o_values = {}
+        o_values["beta"] = [beta_val] * n_subjects
 
     # create model instance
-    if continuous:
-        model = DMModel(rescorla_wagner,[value, alpha], None, None, logp_function='beta')
+    if model_type == rescorla_wagner:
+        if continuous:
+            model = DMModel(rescorla_wagner,[value, alpha], None, None, logp_function='beta')
+        else:
+            model = DMModel(rescorla_wagner,[value, alpha], softmax, [beta], logp_function='bernoulli')
+    elif model_type == dual_lr_rw:
+        if continuous:
+            model = DMModel(dual_lr_rw,[value, alpha_p, alpha_n], None, None, logp_function='beta')
+        else:
+            model = DMModel(dual_lr_rw,[value, alpha_p, alpha_n], softmax, [beta], logp_function='bernoulli')
     else:
-        model = DMModel(rescorla_wagner,[value, alpha], softmax, [beta], logp_function='bernoulli')
+        print(f"Error: model_type {model_type} not recognised.")
 
-    return model, values
+    return model, l_values, o_values
 
 
-def model_simulation(model, values, continuous=False, sim_plot=True, recover=True):
+def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True, recover=True):
     """
         Simulates from model, and performs parameter recovery if necessary
         Arguments:
@@ -64,27 +82,49 @@ def model_simulation(model, values, continuous=False, sim_plot=True, recover=Tru
             sim_plot: if True, will produce a plot of the simulated results
             recover: if True, parameter recovery will be performed (default True)
     """
-    # Call simulate() function with relevant parameters
+
+    # Run simulation on the model
     if continuous:
-        _, sim_rw = model.simulate(outcomes=outcomes,
-                                   n_subjects=n_subjects,
-                                   output_file=sim_path,
-                                   learning_parameters={'value' : values["value"],
-                                                        'alpha' : values["alpha"]},
-                                   noise_sd=sim_noise,
-                                   return_choices=False,
-                                   combinations=False,
-                                   response_variable='value')
+        if model.learning_model == dual_lr_rw:
+            _, sim_rw = model.simulate(outcomes=outcomes,
+                                       n_subjects=n_subjects,
+                                       output_file=sim_path,
+                                       learning_parameters=l_values,
+                                       noise_sd=sim_noise,
+                                       return_choices=False,
+                                       combinations=False,
+                                       response_variable='value',
+                                       model_inputs={'Resistance'})
+        else:
+            _, sim_rw = model.simulate(outcomes=outcomes,
+                                       n_subjects=n_subjects,
+                                       output_file=sim_path,
+                                       learning_parameters=l_values,
+                                       noise_sd=sim_noise,
+                                       return_choices=False,
+                                       combinations=False,
+                                       response_variable='value')
     else:
-        _, sim_rw = model.simulate(outcomes=outcomes,
-                                   n_subjects=n_subjects,
-                                   output_file=sim_path,
-                                   learning_parameters={'value' : values["value"],
-                                                        'alpha' : values["alpha"]},
-                                   observation_parameters={'beta' : values["beta"]},
-                                   return_choices=True,
-                                   combinations=False,
-                                   response_variable='prob')
+        if model.learning_model == dual_lr_rw:
+            print("Running simulation using dual_lr_rw")
+            _, sim_rw = model.simulate(outcomes=outcomes,
+                                       n_subjects=n_subjects,
+                                       output_file=sim_path,
+                                       learning_parameters=l_values,
+                                       observation_parameters=o_values,
+                                       return_choices=True,
+                                       combinations=False,
+                                       response_variable='prob',
+                                       model_inputs={'Resistance'})
+        else:
+            _, sim_rw = model.simulate(outcomes=outcomes,
+                                       n_subjects=n_subjects,
+                                       output_file=sim_path,
+                                       learning_parameters=l_values,
+                                       observation_parameters=o_values,
+                                       return_choices=True,
+                                       combinations=False,
+                                       response_variable='prob')
 
     # Plot results from simulation
     if sim_plot:
@@ -130,24 +170,17 @@ def fit_model(model, continuous=False, plot=True):
             alpha_vals = np.tile(alpha_vals, 2)
         n_alpha = len(alpha_vals)
 
-        # Simulate with fitted alpha values
-        # TODO: sim with fitted beta vals as well
-        model.fit_complete = False # Required to avoid theano exception
+        # Simulate with fitted parameter values
+        # TODO: see if plot_against_true can be debugged?
         if continuous:
             _, sim_a = model.simulate(outcomes=outcomes,
                                       n_subjects=n_alpha,
-                                      learning_parameters={'value' : [0.5]*n_alpha,
-                                                           'alpha' : alpha_vals},
                                       return_choices=False,
                                       response_variable='value')
         else:
             beta_vals = np.array(model.parameter_table["beta"])
             _, sim_a = model.simulate(outcomes=outcomes,
                                       n_subjects=n_alpha,
-                                      learning_parameters={'value' : [0.5]*n_alpha,
-                                                           'alpha' : alpha_vals},
-                                      #observation_parameters={'beta' : [beta_val]*n_alpha},
-                                      observation_parameters={'beta' : beta_vals},
                                       return_choices=True,
                                       response_variable='prob')
 

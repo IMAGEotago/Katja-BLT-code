@@ -15,7 +15,7 @@ def rescorla_wagner(o, t, v, alpha):
         o: outcome
         v: prior value
         alpha: learning rate
-        
+
     Returns:
         value: Value on current trial
         pe: prediction error
@@ -25,14 +25,14 @@ def rescorla_wagner(o, t, v, alpha):
 
     return (value, pe)
 
-def dual_lr_rw(o, s, t, v, alpha_p, alpha_n):
+def dual_lr_rw(o, t, s, v, alpha_p, alpha_n):
     """
     Rescorla-Wagner model adapted with a dual learning rate based on type of stimulus used in trial.
 
     Args:
         o: Trial outcome
-        s: Stimulus type used in trial
         t: Trial number
+        s: Stimulus type used in trial
         v: Value on previous trial
         alpha_p: Learning rate for positive stimuli
         alpha_n: Learning rate for negative stimuli
