@@ -13,12 +13,18 @@ from scipy.stats.distributions import chi2
 class Subject:
     """
         Represents each subject used for model fitting.
-        Each subject has an ID number, dataframe containing responses, and an array of outcomes.
+        Each subject has:
+            id: subject ID number
+            df: dataframe containing responses
+            outcomes: an array of trial outcomes
+            resist: log of resistance/no resistance for each trial
+            sim_results: simulation results
     """
-    def __init__(self, id, df, outcomes, sim_results=None):
+    def __init__(self, id, df, outcomes, resist, sim_results=None):
         self.id = id
         self.df = df
         self.outcomes = outcomes
+        self.resist = resist
         self.sim_results = sim_results
 
 def get_BLT_data(input_path, subID, continuous=True):
@@ -80,10 +86,13 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     subIDs = np.full((len(outcomes)), subID)
 
-    # combine outcomes, responses, and subject ID into a dataframe, convert to csv file
-    df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':subIDs})
+    # resistances stored in resist
+    resist = np.array(m_params[7]).reshape(len(m_params[7]))
 
-    return df, outcomes
+    # combine outcomes, responses, and subject ID into a dataframe, convert to csv file
+    df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':subIDs, 'Resistance':resist})
+
+    return df, outcomes, resist
 
 def likelihood_ratio(llmin, llmax):
     """
