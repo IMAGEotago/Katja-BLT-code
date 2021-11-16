@@ -11,8 +11,11 @@ sys.path.insert(0, 'DMpy/')
 # import theano
 # theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
+import numpy as np
 import params
-from models_BLT import define_model, model_simulation, fit_model
+
+from models_BLT import define_model, model_simulation, fit_model, plot_trajectories
+from utils_BLT import likelihood_ratio
 
 # print type of model, number of subjects and trials
 if params.continuous:
@@ -20,9 +23,31 @@ if params.continuous:
 else:
     print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials")
 
-model, values = define_model(continuous=params.continuous)
+# create the model
+model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
 
-model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
+# run simulation
+model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
 
-# call function for fitting model to real data
-#fit_model(model, continuous=params.continuous, plot=True)
+# calculate likelihoods
+# TODO: this part takes a long time with many subjects, put into separate function, write output to file
+individual_fits = model.individual_fits()
+
+for s in range(params.n_subjects):
+    subject = s + 1
+    log_likelihood = individual_fits['logp'][(subject*params.n_outcomes) - 1]
+
+    # likelihood ratio test
+    lr, p = likelihood_ratio(80*np.log(0.5), log_likelihood)
+    print(f"\nSubject {subject}")
+    print(f"Model log likelihood: {log_likelihood}")
+    print(f"lr: {lr}")
+    print("p: %.30f" %p)
+    print(f"pseudo-r2 = {1 - (log_likelihood / (80*np.log(0.5)))}")
+
+# fit model to real data
+fit_model(model, continuous=params.continuous, plot=True)
+
+#plot trajectories
+for s in params.subjects:
+    plot_trajectories(s)
