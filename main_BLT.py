@@ -15,7 +15,7 @@ import numpy as np
 import params
 
 from models_BLT import define_model, model_simulation, fit_model, plot_trajectories
-from utils_BLT import likelihood_ratio
+from utils_BLT import get_model_stats
 
 # print type of model, number of subjects and trials
 if params.continuous:
@@ -30,20 +30,7 @@ model, l_values, o_values = define_model(model_type=params.model_type, continuou
 model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
 
 # calculate likelihoods
-# TODO: this part takes a long time with many subjects, put into separate function, write output to file
-individual_fits = model.individual_fits()
-
-for s in range(params.n_subjects):
-    subject = s + 1
-    log_likelihood = individual_fits['logp'][(subject*params.n_outcomes) - 1]
-
-    # likelihood ratio test
-    lr, p = likelihood_ratio(80*np.log(0.5), log_likelihood)
-    print(f"\nSubject {subject}")
-    print(f"Model log likelihood: {log_likelihood}")
-    print(f"lr: {lr}")
-    print("p: %.30f" %p)
-    print(f"pseudo-r2 = {1 - (log_likelihood / (80*np.log(0.5)))}")
+get_model_stats(model, params.n_subjects, params.n_outcomes)
 
 # fit model to real data
 fit_model(model, continuous=params.continuous, plot=True)

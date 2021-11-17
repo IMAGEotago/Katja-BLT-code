@@ -94,6 +94,34 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     return df, outcomes, resist
 
+def get_model_stats(model, n_subjects, n_outcomes):
+    """
+        Calculates statistics for each subject including:
+            - Model log likelihood
+            - Likelihood ratio (and associated p-value) for model compared to chance
+            - Pseudo-r2 value
+        Arguments:
+            model: the model to calculate the stats for
+            n_subjects: number of subjects
+            n_outcomes: number of outcomes/trials
+    """
+    # get fit data from model
+    individual_fits = model.individual_fits()
+
+    # calculate and print stats
+    # TODO: print to file
+    for s in range(params.n_subjects):
+        subject = s + 1
+        log_likelihood = individual_fits['logp'][(subject*n_outcomes) - 1] #TODO: sum or average across 80 trials
+
+        # likelihood ratio test
+        lr, p = likelihood_ratio(n_outcomes*np.log(0.5), log_likelihood)
+        print(f"\nSubject {subject}")
+        print(f"Model log likelihood: {log_likelihood}")
+        print(f"likelihood ratio: {lr}")
+        print("p: %.30f" %p)
+        print(f"pseudo-r2 = {1 - (log_likelihood / (n_outcomes*np.log(0.5)))}")
+
 def likelihood_ratio(llmin, llmax):
     """
         Calculates the likelihood ratio given the log likelihoods, and subsequent p-value.
@@ -106,4 +134,5 @@ def likelihood_ratio(llmin, llmax):
     """
     lr = 2*(llmax-llmin)
     p = chi2.sf(lr, 1)
+
     return lr, p
