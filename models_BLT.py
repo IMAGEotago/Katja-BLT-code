@@ -11,7 +11,7 @@ from scipy.stats import pearsonr
 from DMpy import DMModel, Parameter
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects, subject_data
 from learning_BLT import rescorla_wagner, dual_lr_rw
 
 
@@ -47,12 +47,12 @@ def define_model(model_type=rescorla_wagner, continuous=False):
         l_values["alpha_n"] = np.random.uniform(0.0, 1.0, n_subjects)
 
     # if binary model, create and save observation parameter/s
+    o_values = {}
     if not continuous:
         if fit_method == 'MLE':
             beta = Parameter('beta', 'flat')
         else:
             beta = Parameter('beta', 'normal', mean=2.14, variance=3.33)
-        o_values = {}
         o_values["beta"] = [beta_val] * n_subjects
 
     # create model instance
@@ -115,7 +115,7 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
                                        return_choices=True,
                                        combinations=False,
                                        response_variable='prob',
-                                       model_inputs={'Resistance'})
+                                       model_inputs=['Resistance'])
         else:
             _, sim_rw = model.simulate(outcomes=outcomes,
                                        n_subjects=n_subjects,
@@ -136,10 +136,14 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
         a = np.zeros(n_subjects)
         for i in range(n_subjects):
             n = i*n_outcomes
-            a[i] = model.simulation_results['alpha_sim'][n]
+            if model.learning_model == dual_lr_rw:
+                a[i] = model.simulation_results['alpha_p_sim'][n] #TODO: this is only for line colours on graphs, remove?
+            else:
+                a[i] = model.simulation_results['alpha_sim'][n]
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.coolwarm(a[i]/3), alpha=0.5)
 
-        plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
+        if model.learning_model == rescorla_wagner: #TODO: this is buggy with dual_lr_rw for some reason
+            plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
         plt.title(f'Simulation results for {n_subjects} subjects')
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
@@ -159,11 +163,17 @@ def fit_model(model, continuous=False, plot=True):
     """
 
     # Fits the data
-    model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False)
+    if model.learning_model == dual_lr_rw:
+        model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False, model_inputs=['Resistance'])
+    else:
+        model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False)
 
     # Plots the fitted alpha values
     if plot:
-        alpha_vals = np.array(model.parameter_table["alpha"])
+        if model.learning_model == dual_lr_rw: #TODO: change to be less messy
+            alpha_vals = np.array(model.parameter_table["alpha_p"])
+        else:
+            alpha_vals = np.array(model.parameter_table["alpha"])
 
         # make sure there are at least 2 alpha values
         if len(alpha_vals) == 1:
@@ -191,12 +201,16 @@ def fit_model(model, continuous=False, plot=True):
         a = np.zeros(n_alpha)
         for i in range(n_alpha):
             n = i*n_outcomes
-            a[i] = model.simulation_results['alpha_sim'][n]
+            if model.learning_model == dual_lr_rw:
+                a[i] = model.simulation_results['alpha_p_sim'][n] #TODO: this is only for line colours on graphs, remove?
+            else:
+                a[i] = model.simulation_results['alpha_sim'][n]
             subjects[i].sim_results = model.simulation_results['value'][n:(n + n_outcomes)]
             plt.plot(x, model.simulation_results['value'][n:(n + n_outcomes)], c=plt.cm.plasma(a[i]), alpha=0.5,
                      label=f"Subject {subjects[i].id};    alpha = {np.round(a[i],3)}")
 
-        plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
+        if model.learning_model == rescorla_wagner: #TODO: this is buggy with dual_lr_rw for some reason
+            plt.scatter(range(0, len(outcomes)), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
         plt.title(f"Simulated behaviour for fitted alpha values for {len(subjects)} participants")
         plt.legend()
         plt.xlabel('Trial')

@@ -28,7 +28,7 @@ from utils_BLT import Subject, get_BLT_data
 continuous = False
 
 # model_type stores the name of the learning function to be used for the model
-model_type = rescorla_wagner
+model_type = dual_lr_rw
 
 # subject ID
 subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010',
@@ -64,6 +64,10 @@ subject_data.to_csv(data_path, index=False)
 
 # n_outcomes stores the number of outcomes (note: will be based on outcomes from last subject)
 n_outcomes = len(outcomes)
+
+# convert outcomes to dataframe when using dual_lr_rw
+if model_type == dual_lr_rw:
+    outcomes = pd.DataFrame({'Outcome':outcomes, 'Resistance':resist})
 
 # n_subjects stores the number of subjects to be simulated
 n_subjects = 500
