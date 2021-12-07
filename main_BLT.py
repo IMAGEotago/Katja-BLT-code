@@ -29,12 +29,15 @@ model, l_values, o_values = define_model(model_type=params.model_type, continuou
 # run simulation
 model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
 
-# calculate likelihoods
-get_model_stats(model, params.n_subjects, params.n_outcomes)
+# # calculate likelihoods
+# get_model_stats(model, params.n_subjects, params.n_outcomes, params.continuous)
 
 # fit model to real data
 fit_model(model, continuous=params.continuous, plot=True)
 
-#plot trajectories
-for s in params.subjects:
-    plot_trajectories(s)
+# calculate likelihoods
+get_model_stats(model, len(params.subjects), params.n_outcomes, params.continuous)
+
+# #plot trajectories
+# for s in params.subjects:
+#     plot_trajectories(s)

@@ -94,7 +94,7 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     return df, outcomes, resist
 
-def get_model_stats(model, n_subjects, n_outcomes):
+def get_model_stats(model, n_subjects, n_outcomes, continuous):
     """
         Calculates statistics for each subject including:
             - Model log likelihood
@@ -104,23 +104,36 @@ def get_model_stats(model, n_subjects, n_outcomes):
             model: the model to calculate the stats for
             n_subjects: number of subjects
             n_outcomes: number of outcomes/trials
+            continuous: whether or not the model is continuous
     """
     # get fit data from model
-    individual_fits = model.individual_fits()
+    if continuous:
+        individual_fits = model.individual_fits(response_variable='value')
+    else:
+        individual_fits = model.individual_fits(response_variable='prob')
 
     # calculate and print stats
     # TODO: print to file
-    for s in range(params.n_subjects):
+    for s in range(n_subjects):
         subject = s + 1
-        log_likelihood = individual_fits['logp'][(subject*n_outcomes) - 1] #TODO: sum or average across 80 trials
+        trial_ll = individual_fits['logp'][(s*n_outcomes):(subject*n_outcomes)].to_numpy()
+        print(trial_ll)
+        trial_ll = np.where(trial_ll < -99999, 0, trial_ll) # deal with -inf values
+        #trial_ll = trial_ll[trial_ll > -99999] # remove -inf values from array
+        ll_len = len(trial_ll)
+        print(trial_ll)
+        log_likelihood = np.sum(trial_ll) #TODO: mean, sum, product???
 
         # likelihood ratio test
-        lr, p = likelihood_ratio(n_outcomes*np.log(0.5), log_likelihood)
+        if continuous:
+            lr, p = likelihood_ratio(ll_len*np.log(1/101), log_likelihood)
+        else:
+            lr, p = likelihood_ratio(ll_len*np.log(0.5), log_likelihood)
         print(f"\nSubject {subject}")
         print(f"Model log likelihood: {log_likelihood}")
         print(f"likelihood ratio: {lr}")
         print("p: %.30f" %p)
-        print(f"pseudo-r2 = {1 - (log_likelihood / (n_outcomes*np.log(0.5)))}")
+        print(f"pseudo-r2 = {1 - (log_likelihood / (ll_len*np.log(0.5)))}")
 
 def likelihood_ratio(llmin, llmax):
     """
