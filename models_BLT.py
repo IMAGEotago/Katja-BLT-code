@@ -23,7 +23,8 @@ def define_model(model_type=rescorla_wagner, continuous=False):
             continuous: determines whether a binary or contiuous response model is created (default binary)
         Returns:
             model: the initialised model
-            values: dictionary containing the simulation values for the initialised parameters
+            l_values: dictionary containing the simulation values for the initialised learning parameters
+            o_values: dictionary containing the simulation values for the initialised learning parameters
     """
     # initialise value parameter
     value = Parameter('value', 'fixed', mean=0.5, dynamic=True)

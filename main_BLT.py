@@ -38,6 +38,6 @@ fit_model(model, continuous=params.continuous, plot=True)
 # calculate likelihoods
 get_model_stats(model, len(params.subjects), params.n_outcomes, params.continuous)
 
-# #plot trajectories
-# for s in params.subjects:
-#     plot_trajectories(s)
+#plot trajectories
+for s in params.subjects:
+    plot_trajectories(s)

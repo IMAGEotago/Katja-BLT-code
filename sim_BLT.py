@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import os
 
 import params
+from learning_BLT import rescorla_wagner, dual_lr_rw
 from models_BLT import define_model, model_simulation
 
 # get current file path
@@ -28,18 +29,23 @@ n_plots = 4
 while run <= repeat:
     # checkpoint
     if params.continuous:
-        print(f"Continuous model run {run} with noise {params.sim_noise}")
+        print(f"Continuous model run {run} with noise {params.sim_noise} using the {params.model_type} learning model")
     else:
-        print(f"Binary model run {run} with beta {params.beta_val}")
+        print(f"Binary model run {run} with beta {params.beta_val} using the {params.model_type} learning model")
 
     # save all output to text file
     file_path = ""
     n = int(params.sim_noise*100)
+    if params.model_type == dual_lr_rw:
+        file_path = os.path.join(fileDir, "../sim_results/dual_lr_rw/")
+    else:
+        file_path = os.path.join(fileDir, "../sim_results/")
+
     if params.continuous:
-        file_path = os.path.join(fileDir, f"../sim_results/continuous/noise_{n}/run_{run}")
+        file_path = os.path.join(file_path, f"continuous/noise_{n}/run_{run}")
         text_path = os.path.join(file_path, f"con_n{n}_log.txt")
     else:
-        file_path = os.path.join(fileDir, f"../sim_results/binary/beta_{params.beta_val}/run_{run}")
+        file_path = os.path.join(file_path, f"binary/beta_{params.beta_val}/run_{run}")
         text_path = os.path.join(file_path, f"bin_b{params.beta_val}_log.txt")
 
     default_stdout = sys.stdout
@@ -47,17 +53,17 @@ while run <= repeat:
 
     # print relevant model parameters
     if params.continuous:
-        print(f"Running continuous model with {params.n_subjects} subjects and {params.n_outcomes} trials")
+        print(f"Running continuous model with {params.n_subjects} subjects and {params.n_outcomes} trials using the {params.model_type} learning model")
         print(f"Noise SD: {params.sim_noise}")
     else:
-        print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials")
+        print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials using the {params.model_type} learning model")
         print(f"Beta: {params.beta_val}")
 
     # create model
-    model, values = define_model(continuous=params.continuous)
+    model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
 
     # run simulation and parameter recovery
-    model_simulation(model, values, continuous=params.continuous, recover=True, sim_plot=True)
+    model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
 
     # save plots
     figs = [plt.figure(n) for n in plt.get_fignums()[-n_plots:]]
@@ -77,11 +83,26 @@ while run <= repeat:
         beta_column = model.parameter_table.loc[:,"beta"]
         beta_values = beta_column.values
 
-    alpha_column = model.parameter_table.loc[:,"alpha"]
-    alpha_values = alpha_column.values
+    if params.model_type == dual_lr_rw:
+        # alpha_p
+        alpha_column = model.parameter_table.loc[:,"alpha_p"]
+        alpha_values = alpha_column.values
 
-    alpha_sim_col = model.parameter_table.loc[:,"alpha_sim"]
-    alpha_sim_vals = alpha_sim_col.values
+        alpha_sim_col = model.parameter_table.loc[:,"alpha_p_sim"]
+        alpha_sim_vals = alpha_sim_col.values
+
+        # alpha_n
+        alpha_n_column = model.parameter_table.loc[:,"alpha_n"]
+        alpha_n_values = alpha_n_column.values
+
+        alpha_n_sim_col = model.parameter_table.loc[:,"alpha_n_sim"]
+        alpha_n_sim_vals = alpha_n_sim_col.values
+    else:
+        alpha_column = model.parameter_table.loc[:,"alpha"]
+        alpha_values = alpha_column.values
+
+        alpha_sim_col = model.parameter_table.loc[:,"alpha_sim"]
+        alpha_sim_vals = alpha_sim_col.values
 
     # Save estimated parameter values to file
     if params.continuous:
@@ -99,6 +120,11 @@ while run <= repeat:
         f.write(f"\n{alpha_values}\n \n")
         f.write("Simulated alpha values:\n")
         f.write(f"\n{alpha_sim_vals}")
+        if params.model_type == dual_lr_rw:
+            f.write("\nEstimated alpha_n values:\n")
+            f.write(f"\n{alpha_n_values}\n \n")
+            f.write("Simulated alpha_n values:\n")
+            f.write(f"\n{alpha_n_sim_vals}")
 
     # close file
     sys.stdout.close()
