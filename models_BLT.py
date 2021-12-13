@@ -95,7 +95,7 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
                                        return_choices=False,
                                        combinations=False,
                                        response_variable='value',
-                                       model_inputs={'Resistance'})
+                                       model_inputs=['Resistance'])
         else:
             _, sim_rw = model.simulate(outcomes=outcomes,
                                        n_subjects=n_subjects,

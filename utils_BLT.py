@@ -117,11 +117,9 @@ def get_model_stats(model, n_subjects, n_outcomes, continuous):
     for s in range(n_subjects):
         subject = s + 1
         trial_ll = individual_fits['logp'][(s*n_outcomes):(subject*n_outcomes)].to_numpy()
-        print(trial_ll)
         trial_ll = np.where(trial_ll < -99999, 0, trial_ll) # deal with -inf values
         #trial_ll = trial_ll[trial_ll > -99999] # remove -inf values from array
         ll_len = len(trial_ll)
-        print(trial_ll)
         log_likelihood = np.sum(trial_ll) #TODO: mean, sum, product???
 
         # likelihood ratio test
