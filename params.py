@@ -22,10 +22,10 @@ import os
 import pandas as pd
 
 from learning_BLT import rescorla_wagner, dual_lr_rw
-from utils_BLT import Subject, get_BLT_data
+from utils_BLT import Subject, get_BLT_data, get_certainty
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
-continuous = False
+continuous = True
 
 # model_type stores the name of the learning function to be used for the model
 model_type = dual_lr_rw
@@ -50,6 +50,7 @@ for id in subID:
     mat_file = os.path.abspath(os.path.realpath(mat_file))
     df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
     subjects.append(Subject(id, df, outcomes, resist))
+    get_certainty(id, df) #print average certainty for each subject
 
 # data_path holds filepath to csv file containing data from all subjects for model fitting
 data_path = "output_files/subject_data.csv"

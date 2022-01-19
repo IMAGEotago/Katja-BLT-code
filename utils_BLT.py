@@ -4,6 +4,7 @@
     Created: 28/06/2021
     Description: This contains various functions used by main_BLT.py, models_BLT.py etc.
 """
+import math
 import numpy as np
 import pandas as pd
 import scipy.io as sio
@@ -147,3 +148,21 @@ def likelihood_ratio(llmin, llmax):
     p = chi2.sf(lr, 1)
 
     return lr, p
+
+def get_certainty(id, df):
+    """
+        Calculates the average certainty for a given participant.
+        Arguments:
+            id: Participant id
+            df: Dataframe containing participant responses
+    """
+    responses = df["Response"].values
+    certainty = 0.0
+
+    for r in responses:
+        if not math.isnan(r):
+            c = abs(r - 0.5)
+            certainty = certainty + c
+
+    certainty = certainty / len(responses)
+    print(f"Average certainty for participant {id} was {certainty}")
