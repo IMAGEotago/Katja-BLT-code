@@ -22,7 +22,7 @@ import os
 import pandas as pd
 
 from learning_BLT import rescorla_wagner, dual_lr_rw
-from utils_BLT import Subject, get_BLT_data, get_certainty
+from utils_BLT import Subject, get_BLT_data, get_certainty, get_proportion_correct
 
 # continuous stores boolean value determining whether model is continuous (True) or binary (False)
 continuous = True
@@ -46,7 +46,7 @@ for id in subID:
     if subID == 'test':
         mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
     else: #TODO: put in try/catch loop?
-        mat_file = os.path.join(fileDir, f'../../../../OneDrive/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
+        mat_file = os.path.join(fileDir, f'../../code/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
     mat_file = os.path.abspath(os.path.realpath(mat_file))
     df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
     subjects.append(Subject(id, df, outcomes, resist))
@@ -65,6 +65,10 @@ subject_data.to_csv(data_path, index=False)
 
 # n_outcomes stores the number of outcomes (note: will be based on outcomes from last subject)
 n_outcomes = len(outcomes)
+
+# get proportion of correct responses for each trial
+prop_df = get_proportion_correct(subjects, n_outcomes, True)
+prop_df.to_csv("output_files/proportions.csv", index=False)
 
 # convert outcomes to dataframe when using dual_lr_rw
 if model_type == dual_lr_rw:

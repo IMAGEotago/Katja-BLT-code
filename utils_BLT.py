@@ -5,9 +5,11 @@
     Description: This contains various functions used by main_BLT.py, models_BLT.py etc.
 """
 import math
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.io as sio
+from scipy.stats import pearsonr
 
 from scipy.stats.distributions import chi2
 
@@ -166,3 +168,50 @@ def get_certainty(id, df):
 
     certainty = certainty / len(responses)
     print(f"Average certainty for participant {id} was {certainty}")
+
+def get_proportion_correct(subjects, n_trials, plot):
+    """
+        Calculates proportion correct and average certainty for each trial across all subjects.
+        Arguments:
+            subjects: list of subjects
+            n_trials: number of trials
+            plot: if true, creates plots
+        Returns:
+            proportions_df: dataframe containing proportion correct and average certainty for each trial
+    """
+    proportions = np.zeros(n_trials)
+    certainty = np.zeros(n_trials)
+    for s in subjects:
+        for i in range(n_trials):
+            o = s.df['Outcome'][i]
+            r = s.df['Response'][i]
+            if (o == 1 and r > 0.5) or (o == 0 and r < 0.5):
+                proportions[i] = proportions[i] + 1
+
+            c = abs(r - 0.5)
+            if not math.isnan(r):
+                certainty[i] = certainty[i] + c
+
+    proportions = proportions / len(subjects)
+    certainty = certainty / len(subjects)
+    trials = np.arange(n_trials) + 1
+
+    proportions_df = pd.DataFrame({'Trial':trials, 'Proportion':proportions, 'Certainty':certainty})
+
+    if plot == True:
+        # get neuron data
+        neuron_df = pd.read_csv('input_files/NeuronDataProportionCorrect.csv', header=0, index_col=0)
+        neuron_proportions = neuron_df['PROPORTION CORRECT'].values
+
+        r_val, p_val = pearsonr(proportions, neuron_proportions)
+        print(f"Pearson's r: {r_val}                p value: {p_val}")
+
+        plt.figure(figsize=(15,4))
+        plt.plot(trials, proportions, color='r', label='Current study')
+        plt.plot(trials, neuron_proportions, color='k', label='Previous study')
+        plt.legend(loc=4)
+        plt.xlabel('Trials')
+        plt.text(77, 0.95, f'R = {np.round(r_val,4)}', fontsize='large')
+        plt.show()
+
+    return proportions_df
