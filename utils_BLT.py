@@ -116,14 +116,12 @@ def get_model_stats(model, n_subjects, n_outcomes, continuous):
         individual_fits = model.individual_fits(response_variable='prob')
 
     # calculate and print stats
-    # TODO: print to file
     for s in range(n_subjects):
         subject = s + 1
         trial_ll = individual_fits['logp'][(s*n_outcomes):(subject*n_outcomes)].to_numpy()
         trial_ll = np.where(trial_ll < -99999, 0, trial_ll) # deal with -inf values
-        #trial_ll = trial_ll[trial_ll > -99999] # remove -inf values from array
         ll_len = len(trial_ll)
-        log_likelihood = np.sum(trial_ll) #TODO: mean, sum, product???
+        log_likelihood = np.sum(trial_ll)
 
         # likelihood ratio test
         if continuous:
@@ -207,7 +205,7 @@ def get_proportion_correct(subjects, n_trials, plot):
         print(f"Pearson's r: {r_val}                p value: {p_val}")
 
         plt.figure(figsize=(15,4))
-        plt.plot(trials, proportions, color='r', label='Current study')
+        plt.plot(trials, proportions, color='tab:red', label='Current study')
         plt.plot(trials, neuron_proportions, color='k', label='Previous study')
         plt.legend(loc=4)
         plt.xlabel('Trials')

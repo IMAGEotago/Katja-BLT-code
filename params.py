@@ -28,10 +28,10 @@ from utils_BLT import Subject, get_BLT_data, get_certainty, get_proportion_corre
 continuous = True
 
 # model_type stores the name of the learning function to be used for the model
-model_type = dual_lr_rw
+model_type = rescorla_wagner
 
 # subject ID
-subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0008', '0009', '0010',
+subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0009', '0010',
         '0011', '0012', '0013', '0014', '0015', '0016']
 
 # sim_path stores the filepath where results from simulation are written to
@@ -45,7 +45,7 @@ subjects = []
 for id in subID:
     if subID == 'test':
         mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
-    else: #TODO: put in try/catch loop?
+    else:
         mat_file = os.path.join(fileDir, f'../../code/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
     mat_file = os.path.abspath(os.path.realpath(mat_file))
     df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
@@ -78,7 +78,7 @@ if model_type == dual_lr_rw:
 n_subjects = 500
 
 # standard deviation of gaussian noise to be used for simulation
-sim_noise = 0.2
+sim_noise = 0.01
 
 # beta value to be used for binary model
 beta_val = 5
