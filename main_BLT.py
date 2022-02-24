@@ -8,12 +8,16 @@ import sys
 sys.path.insert(0, 'DMpy/')
 
 # fix to deal with theano Exception on certain computers
-# import theano
-# theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
+import theano
+theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
+import matplotlib.pyplot as plt
 import numpy as np
-import params
+from scipy.stats import pearsonr
 
+from learning_BLT import dual_lr_rw
+
+import params
 from models_BLT import define_model, model_simulation, fit_model, plot_trajectories
 from utils_BLT import get_model_stats
 
@@ -38,6 +42,30 @@ fit_model(model, continuous=params.continuous, plot=True)
 # calculate likelihoods
 get_model_stats(model, len(params.subjects), params.n_outcomes, params.continuous)
 
-#plot trajectories
+# plot trajectories for each participant
+predictions = []
+simulations = []
+
 for s in params.subjects:
-    plot_trajectories(s)
+    p, s = plot_trajectories(s)
+    predictions.append(p)
+    simulations.append(s)
+
+# calculate and plot average trajectories
+mean_prediction = np.mean(np.array(predictions), axis=0)
+mean_simulation = np.mean(np.array(simulations), axis=0)
+
+r_val, p_val = pearsonr(mean_prediction, mean_simulation)
+print(f"R = {np.round(r_val, 6)}, p = {p_val}")
+
+plt.figure(figsize=(15,4))
+plt.plot(mean_prediction, '-', c='tab:red', label="Mean raw predictions")
+plt.plot(np.arange(params.n_outcomes), mean_simulation, '-', c='coral', label="Mean model predictions")
+if params.model_type == dual_lr_rw:
+    plt.plot(params.outcomes['Outcome'].values, 'o', c='darkred', alpha=0.8)
+else:
+    plt.plot(params.outcomes, 'o', c='darkred', alpha=0.8)
+plt.text(75, 0.8, f'R = {np.round(r_val,4)}', fontsize='large')
+plt.xlabel('Trial')
+plt.legend()
+plt.show()
