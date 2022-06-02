@@ -60,11 +60,11 @@ print(f"R = {np.round(r_val, 6)}, p = {p_val}")
 
 plt.figure(figsize=(15,4))
 plt.plot(mean_prediction, '-', c='tab:red', label="Mean raw predictions")
-plt.plot(np.arange(params.n_outcomes), mean_simulation, '-', c='coral', label="Mean model predictions")
-if params.model_type == dual_lr_rw:
-    plt.plot(params.outcomes['Outcome'].values, 'o', c='darkred', alpha=0.8)
-else:
-    plt.plot(params.outcomes, 'o', c='darkred', alpha=0.8)
+plt.plot(np.arange(params.n_outcomes), mean_simulation, '-', c='black', label="Mean model predictions")
+# if params.model_type == dual_lr_rw: #plots the outcomes as dark red circles
+#     plt.plot(params.outcomes['Outcome'].values, 'o', c='darkred', alpha=0.8)
+# else:
+#     plt.plot(params.outcomes, 'o', c='darkred', alpha=0.8)
 plt.text(75, 0.8, f'R = {np.round(r_val,4)}', fontsize='large')
 plt.xlabel('Trial')
 plt.legend()

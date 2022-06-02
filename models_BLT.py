@@ -197,6 +197,7 @@ def fit_model(model, continuous=False, plot=True):
 
         x = np.arange(n_outcomes)
         plt.figure(figsize=(15,4))
+        plt.style.use('grayscale')
 
         # Plot simulated behaviour for each subject
         for i in range(n_alpha):
@@ -209,7 +210,7 @@ def fit_model(model, continuous=False, plot=True):
             plt.scatter(range(n_outcomes), outcomes['Outcome'].values, facecolors='none', linewidths=1, color='black', alpha=0.5)
         else:
             plt.scatter(range(n_outcomes), outcomes, facecolors='none', linewidths=1, color='black', alpha=0.5)
-        plt.legend(bbox_to_anchor=(1.1,1))
+        #plt.legend(bbox_to_anchor=(1.1,1))
         plt.xlabel('Trial')
         plt.ylabel('Estimated value')
         plt.show()

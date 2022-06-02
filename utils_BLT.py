@@ -209,6 +209,7 @@ def get_proportion_correct(subjects, n_trials, plot):
         plt.plot(trials, neuron_proportions, color='k', label='Previous study')
         plt.legend(loc=4)
         plt.xlabel('Trials')
+        plt.ylabel('Proportion correct')
         plt.text(77, 0.95, f'R = {np.round(r_val,4)}', fontsize='large')
         plt.show()
 
