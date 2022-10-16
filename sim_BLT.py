@@ -44,9 +44,11 @@ while run <= repeat:
     if params.continuous:
         file_path = os.path.join(file_path, f"continuous/noise_{n}/run_{run}")
         text_path = os.path.join(file_path, f"con_n{n}_log.txt")
+        noise_path = os.path.join(file_path, f"con_n{n}_noise.txt")
     else:
         file_path = os.path.join(file_path, f"binary/beta_{params.beta_val}/run_{run}")
         text_path = os.path.join(file_path, f"bin_b{params.beta_val}_log.txt")
+        noise_path = None
 
     default_stdout = sys.stdout
     sys.stdout = open(text_path, "w")
@@ -63,7 +65,7 @@ while run <= repeat:
     model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
 
     # run simulation and parameter recovery
-    model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
+    model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True, noise_path=noise_path)
 
     # save plots
     figs = [plt.figure(n) for n in plt.get_fignums()[-n_plots:]]
@@ -82,6 +84,7 @@ while run <= repeat:
     if not params.continuous:
         beta_column = model.parameter_table.loc[:,"beta"]
         beta_values = beta_column.values
+        log_beta_values = np.log10(beta_values)
 
     if params.model_type == dual_lr_rw:
         # alpha_p
@@ -115,6 +118,9 @@ while run <= repeat:
             f.write(f"Mean est. beta: {np.mean(beta_values)} \nStd est. beta: {np.std(beta_values)} \n")
             f.write("\nBeta values:\n")
             f.write(f"\n{beta_values}\n \n")
+            f.write(f"Mean est. log beta: {np.nanmean(log_beta_values)} \nStd est. beta: {np.nanstd(log_beta_values)} \n")
+            f.write("\nLog beta values:\n")
+            f.write(f"\n{log_beta_values}\n \n")
 
         f.write("Estimated alpha values:\n")
         f.write(f"\n{alpha_values}\n \n")
