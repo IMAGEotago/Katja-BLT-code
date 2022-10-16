@@ -13,6 +13,8 @@ from scipy.stats import pearsonr
 
 from scipy.stats.distributions import chi2
 
+from null_models import continuous_null_likelihood, binary_null_likelihood
+
 class Subject:
     """
         Represents each subject used for model fitting.
@@ -40,6 +42,7 @@ def get_BLT_data(input_path, subID, continuous=True):
         Returns:
             df: pandas dataframe containing the outcomes, responses, and subject ID
             outcomes: a numpy array containing the outcomes from the experiment
+            resist: a numpy array containing the resistances
     """
     # get contents from matlab file
     contents = sio.loadmat(input_path)
@@ -97,7 +100,7 @@ def get_BLT_data(input_path, subID, continuous=True):
 
     return df, outcomes, resist
 
-def get_model_stats(model, n_subjects, n_outcomes, continuous):
+def get_model_stats(model, subID, n_outcomes, continuous, data_path, fit_method):
     """
         Calculates statistics for each subject including:
             - Model log likelihood
@@ -105,15 +108,30 @@ def get_model_stats(model, n_subjects, n_outcomes, continuous):
             - Pseudo-r2 value
         Arguments:
             model: the model to calculate the stats for
-            n_subjects: number of subjects
+            subID: list of subject IDs
             n_outcomes: number of outcomes/trials
             continuous: whether or not the model is continuous
+            data_path: datapath to subject data (for continuous null model)
+            fit_method: fit method (for continuous null model)
     """
+    n_subjects = len(subID)
+
     # get fit data from model
     if continuous:
         individual_fits = model.individual_fits(response_variable='value')
     else:
         individual_fits = model.individual_fits(response_variable='prob')
+
+    # get null likelihoods
+    if continuous:
+        null_likelihoods = continuous_null_likelihood(n_subjects, n_outcomes, data_path, fit_method)
+    else:
+        null_likelihoods = binary_null_likelihood(n_subjects, n_outcomes, data_path, fit_method)
+
+    # create empty arrays to hold LRT results
+    model_likelihoods = np.empty(n_subjects, dtype=np.float64)
+    likelihood_ratios = np.empty(n_subjects, dtype=np.float64)
+    p_values = np.empty(n_subjects, dtype=np.float64)
 
     # calculate and print stats
     for s in range(n_subjects):
@@ -125,21 +143,31 @@ def get_model_stats(model, n_subjects, n_outcomes, continuous):
 
         # likelihood ratio test
         if continuous:
-            lr, p = likelihood_ratio(ll_len*np.log(1/101), log_likelihood)
+            lr, p = likelihood_ratio(null_likelihoods[s], log_likelihood)
         else:
-            lr, p = likelihood_ratio(ll_len*np.log(0.5), log_likelihood)
-        print(f"\nSubject {subject}")
+            #lr, p = likelihood_ratio(ll_len*np.log(0.5), log_likelihood)
+            lr, p = likelihood_ratio(null_likelihoods[s], log_likelihood)
+        model_likelihoods[s] = log_likelihood
+        likelihood_ratios[s] = lr
+        p_values[s] = p
+        print(f"\nSubject {subID[s]}")
         print(f"Model log likelihood: {log_likelihood}")
         print(f"likelihood ratio: {lr}")
         print("p: %.30f" %p)
-        print(f"pseudo-r2 = {1 - (log_likelihood / (ll_len*np.log(0.5)))}")
+        if not continuous:
+            print(f"pseudo-r2 = {1 - (log_likelihood / (ll_len*np.log(0.5)))}")
+
+    # put data into DataFrame and convert to csv file
+    lrt_df = pd.DataFrame({'PPID':subID, 'Model likelihood':model_likelihoods,
+        'Null likelihood':null_likelihoods, 'Likelihood ratio':likelihood_ratios, 'p value':p_values})
+    lrt_df.to_csv("output_files/lrt_data.csv")
 
 def likelihood_ratio(llmin, llmax):
     """
         Calculates the likelihood ratio given the log likelihoods, and subsequent p-value.
         Arguments:
-            llmin: log likelihood #1
-            llmax: log likelihood #2
+            llmin: log likelihood #1 (null log likelihood)
+            llmax: log likelihood #2 (model log likelihood)
         Returns:
             lr: the likelihood ratio
             p: the p-value of the likelihood ratio

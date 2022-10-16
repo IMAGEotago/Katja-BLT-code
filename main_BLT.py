@@ -13,7 +13,7 @@ theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, shapiro
 
 from learning_BLT import dual_lr_rw
 
@@ -31,16 +31,13 @@ else:
 model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
 
 # run simulation
-model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
-
-# # calculate likelihoods
-# get_model_stats(model, params.n_subjects, params.n_outcomes, params.continuous)
+#model_simulation(model, l_values, o_values, continuous=params.continuous, recover=False, sim_plot=True)
 
 # fit model to real data
 fit_model(model, continuous=params.continuous, plot=True)
 
 # calculate likelihoods
-get_model_stats(model, len(params.subjects), params.n_outcomes, params.continuous)
+get_model_stats(model, params.subID, params.n_outcomes, params.continuous, params.data_path, params.fit_method)
 
 # plot trajectories for each participant
 predictions = []
@@ -50,6 +47,16 @@ for s in params.subjects:
     p, s = plot_trajectories(s)
     predictions.append(p)
     simulations.append(s)
+
+# # Get standard deviation of residuals and normality test
+# residuals = np.array(predictions) - np.array(simulations)
+# for n in range(len(params.subID)):
+#     print(f"{n}: {np.std(residuals[n])}")
+#     stat, p = shapiro(residuals[n])
+#     print(f"p: {p}")
+# print(f"Overall: {np.std(residuals)}")
+# stat, p = shapiro(residuals)
+# print(f"p: {p}")
 
 # calculate and plot average trajectories
 mean_prediction = np.mean(np.array(predictions), axis=0)
