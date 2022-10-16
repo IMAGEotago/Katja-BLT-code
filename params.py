@@ -33,6 +33,7 @@ model_type = rescorla_wagner
 # subject ID
 subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0009', '0010',
         '0011', '0012', '0013', '0014', '0015', '0016']
+# subID = 'pilot'
 
 # sim_path stores the filepath where results from simulation are written to
 sim_path = "output_files/sim_blt_responses.csv"
@@ -42,15 +43,29 @@ fileDir = os.path.dirname(os.path.realpath('__file__'))
 subjects = []
 
 # for each subject, extract data from file and create a Subject object
-for id in subID:
-    if subID == 'test':
-        mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
-    else:
-        mat_file = os.path.join(fileDir, f'../../code/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
-    mat_file = os.path.abspath(os.path.realpath(mat_file))
-    df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
-    subjects.append(Subject(id, df, outcomes, resist))
-    get_certainty(id, df) #print average certainty for each subject
+if subID == 'pilot':
+    xls_file = os.path.join(fileDir, '../../../../OneDrive - University of Otago/data/pilot/PBIHB_pilots_beh.xlsx')
+    xls_file = os.path.abspath(os.path.realpath(xls_file))
+    pilot_responses = pd.read_excel(xls_file, sheet_name='y', header=None, index_col=None)
+    pilot_outcomes = pd.read_excel(xls_file, sheet_name='u', header=None, index_col=None)
+    print(pilot_responses)
+    print(pilot_outcomes)
+    for p in range(8):
+        outcomes = pilot_outcomes.iloc[p]
+        responses = pilot_responses.iloc[p]
+        df = pd.DataFrame({'Outcome':outcomes, 'Response':responses, 'Subject':p})
+        print(f"pilot {p} df: \n{df}")
+        subjects.append(Subject(p, df, outcomes, None))
+else:
+    for id in subID:
+        if subID == 'test':
+            mat_file = os.path.join(fileDir, '../../test_data/testKB_task_BLT_2021_03_09_130052.mat')
+        else:
+            mat_file = os.path.join(fileDir, f'../../../../OneDrive - University of Otago/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
+        mat_file = os.path.abspath(os.path.realpath(mat_file))
+        df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
+        subjects.append(Subject(id, df, outcomes, resist))
+        get_certainty(id, df) #print average certainty for each subject
 
 # data_path holds filepath to csv file containing data from all subjects for model fitting
 data_path = "output_files/subject_data.csv"
@@ -66,9 +81,9 @@ subject_data.to_csv(data_path, index=False)
 # n_outcomes stores the number of outcomes (note: will be based on outcomes from last subject)
 n_outcomes = len(outcomes)
 
-# get proportion of correct responses for each trial
-prop_df = get_proportion_correct(subjects, n_outcomes, True)
-prop_df.to_csv("output_files/proportions.csv", index=False)
+# # get proportion of correct responses for each trial
+# prop_df = get_proportion_correct(subjects, n_outcomes, True)
+# prop_df.to_csv("output_files/proportions.csv", index=False)
 
 # convert outcomes to dataframe when using dual_lr_rw
 if model_type == dual_lr_rw:
@@ -84,4 +99,5 @@ sim_noise = 0.01
 beta_val = 5
 
 # fit_method stores the method to be used for model Fitting
+# fit_method = 'MLE'
 fit_method = 'MAP'
