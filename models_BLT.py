@@ -6,12 +6,13 @@
 """
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, norm, truncnorm
+from scipy.special import logit, expit
 
 from DMpy import DMModel, Parameter
 from DMpy.observation import softmax
 
-from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects, subject_data
+from params import n_subjects, outcomes, n_outcomes, sim_path, sim_noise, data_path, fit_method, beta_val, subjects, subject_data, subID
 from learning_BLT import rescorla_wagner, dual_lr_rw
 
 
@@ -38,14 +39,14 @@ def define_model(model_type=rescorla_wagner, continuous=False):
         if fit_method == 'MLE':
             alpha = Parameter('alpha', 'uniform', lower_bound=0.0, upper_bound=1.0)
         else:
-            alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
-        l_values["alpha"] = np.random.uniform(0.0, 1.0, n_subjects)
+            alpha = Parameter('alpha', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.34, variance=0.88)
+        l_values["alpha"] = truncnorm.rvs((0.0-0.34)/0.94, (1.0-0.34)/0.94, 0.34, 0.94, n_subjects) #truncated normal dist bounded between 0.0 and 1.0
 
     if model_type == dual_lr_rw:
-        alpha_n = Parameter('alpha_n', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
-        alpha_p = Parameter('alpha_p', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.29, variance=2.54)
-        l_values["alpha_p"] = np.random.uniform(0.0, 1.0, n_subjects)
-        l_values["alpha_n"] = np.random.uniform(0.0, 1.0, n_subjects)
+        alpha_n = Parameter('alpha_n', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.34, variance=0.88)
+        alpha_p = Parameter('alpha_p', 'normal', lower_bound=0.0, upper_bound=1.0, mean=0.34, variance=0.88)
+        l_values["alpha_p"] = truncnorm.rvs((0.0-0.34)/0.94, (1.0-0.34)/0.94, 0.34, 0.94, n_subjects)
+        l_values["alpha_n"] = truncnorm.rvs((0.0-0.34)/0.94, (1.0-0.34)/0.94, 0.34, 0.94, n_subjects)
 
     # if binary model, create and save observation parameter/s
     o_values = {}
@@ -53,7 +54,7 @@ def define_model(model_type=rescorla_wagner, continuous=False):
         if fit_method == 'MLE':
             beta = Parameter('beta', 'flat')
         else:
-            beta = Parameter('beta', 'normal', mean=2.14, variance=3.33)
+            beta = Parameter('beta', 'normal', mean=4.21, variance=1.75)
         o_values["beta"] = [beta_val] * n_subjects
 
     # create model instance
@@ -73,7 +74,7 @@ def define_model(model_type=rescorla_wagner, continuous=False):
     return model, l_values, o_values
 
 
-def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True, recover=True):
+def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True, recover=True, noise_path=None):
     """
         Simulates from model, and performs parameter recovery if necessary
         Arguments:
@@ -82,6 +83,7 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
             continuous: determines whether a binary or contiuous response model is created (default binary)
             sim_plot: if True, will produce a plot of the simulated results
             recover: if True, parameter recovery will be performed (default True)
+            noise_path: location of file to save noise to (if provided)
     """
 
     # Run simulation on the model
@@ -127,6 +129,11 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
                                        combinations=False,
                                        response_variable='prob')
 
+    if noise_path is not None:
+        added_noise = (model.simulation_results['value'] - model.simulation_results['value_clean']).tolist()
+        with open(noise_path, "w") as f:
+            f.write(f"{added_noise}") #noise file now contains all noise values added to each simulation trial
+
     # Plot results from simulation
     if sim_plot:
         x = np.arange(n_outcomes)
@@ -170,6 +177,30 @@ def fit_model(model, continuous=False, plot=True):
         model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False, model_inputs=['Resistance'])
     else:
         model.fit(data_path, fit_method=fit_method, fit_stats=True, recovery=False)
+
+    # get priors from pilot data
+    if subID == 'pilot':
+        alpha_vals = np.array(model.parameter_table["alpha"])
+        beta_vals = np.array(model.parameter_table["beta"])
+
+        #log transform beta values
+        beta_vals = np.log10(beta_vals)
+        print(f"log betas:\n{beta_vals}")
+
+        #logit transform alpha values
+        alpha_vals = logit(alpha_vals)
+        print(f"logit alphas:\n{alpha_vals}")
+
+        #fit (robust) normal distribution to alpha and beta values
+        b_mean, b_std = norm.fit(beta_vals)
+        a_mean, a_std = norm.fit(alpha_vals)
+
+        #back transform mean and standard deviations to get priors
+        b_mean = 10**(b_mean) #log backtransform
+        b_std = 10**(b_std)
+        a_mean = expit(a_mean) #logit backtransform
+        a_std = expit(a_std)
+        print(f"alpha prior mean: {a_mean} std: {a_std} \nbeta prior mean: {b_mean} std: {b_std}")
 
     # Plots the fitted alpha values
     if plot:
