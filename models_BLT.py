@@ -86,6 +86,12 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
             noise_path: location of file to save noise to (if provided)
     """
 
+    # print type of model, number of subjects and trials
+    if params.continuous:
+        print(f"Running continuous model simulation with {n_subjects} subjects and {n_outcomes} trials")
+    else:
+        print(f"Running binary model simulation with {n_subjects} subjects and {n_outcomes} trials")
+
     # Run simulation on the model
     if continuous:
         if model.learning_model == dual_lr_rw:

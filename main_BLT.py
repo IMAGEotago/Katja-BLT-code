@@ -7,9 +7,9 @@
 import sys
 sys.path.insert(0, 'DMpy/')
 
-# fix to deal with theano Exception on certain computers
-import theano
-theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
+# # fix to deal with theano Exception on certain computers
+# import theano
+# theano.config.gcc.cxxflags = "-Wno-c++11-narrowing"
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,12 +20,6 @@ from learning_BLT import dual_lr_rw
 import params
 from models_BLT import define_model, model_simulation, fit_model, plot_trajectories
 from utils_BLT import get_model_stats
-
-# print type of model, number of subjects and trials
-if params.continuous:
-    print(f"Running continuous model with {params.n_subjects} subjects and {params.n_outcomes} trials")
-else:
-    print(f"Running binary model with {params.n_subjects} subjects and {params.n_outcomes} trials")
 
 # create the model
 model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
