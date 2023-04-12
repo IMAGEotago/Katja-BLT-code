@@ -87,7 +87,7 @@ def model_simulation(model, l_values, o_values, continuous=False, sim_plot=True,
     """
 
     # print type of model, number of subjects and trials
-    if params.continuous:
+    if continuous:
         print(f"Running continuous model simulation with {n_subjects} subjects and {n_outcomes} trials")
     else:
         print(f"Running binary model simulation with {n_subjects} subjects and {n_outcomes} trials")

@@ -25,7 +25,7 @@ from utils_BLT import get_model_stats
 model, l_values, o_values = define_model(model_type=params.model_type, continuous=params.continuous)
 
 # run simulation
-#model_simulation(model, l_values, o_values, continuous=params.continuous, recover=False, sim_plot=True)
+model_simulation(model, l_values, o_values, continuous=params.continuous, recover=True, sim_plot=True)
 
 # fit model to real data
 fit_model(model, continuous=params.continuous, plot=True)
