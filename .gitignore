@@ -1,4 +1,4 @@
-output_files/
-input_files/
+output_files/*
+input_files/*
 __pycache__
 *.pyc

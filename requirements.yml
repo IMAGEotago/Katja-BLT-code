@@ -6,7 +6,7 @@ dependencies:
   - python=3.8
   - matplotlib
   - pandas
-  - pymc3
+  - pymc3=3.11.5
   - seaborn
   - ipython
   - arviz=0.11.0
