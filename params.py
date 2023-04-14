@@ -34,7 +34,6 @@ model_type = rescorla_wagner
 subID = ['0001', '0002', '0003', '0004', '0005', '0006', '0007', '0009', '0010',
         '0011', '0012', '0013', '0014', '0015', '0016']
 # subID = 'pilot'
-# subID = ['test','test2'] # Use for testing
 
 # sim_path stores the filepath where results from simulation are written to
 sim_path = "output_files/sim_blt_responses.csv"
@@ -45,7 +44,7 @@ subjects = []
 
 # for each subject, extract data from file and create a Subject object
 if subID == 'pilot':
-    xls_file = os.path.join(fileDir, '../../code/data/pilot/PBIHB_pilots_beh.xlsx')
+    xls_file = os.path.join(fileDir, 'input_files/data/pilot/PBIHB_pilots_beh.xlsx')
     xls_file = os.path.abspath(os.path.realpath(xls_file))
     pilot_responses = pd.read_excel(xls_file, sheet_name='y', header=None, index_col=None)
     pilot_outcomes = pd.read_excel(xls_file, sheet_name='u', header=None, index_col=None)
@@ -62,7 +61,7 @@ else:
         if 'test' in id:
             mat_file = os.path.join(fileDir, 'input_files/test_data.mat')
         else:
-            mat_file = os.path.join(fileDir, f'../../code/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
+            mat_file = os.path.join(fileDir, f'input_files/data/sub-{id}/beh/sub-{id}_task-BLT_beh.mat')
         mat_file = os.path.abspath(os.path.realpath(mat_file))
         df, outcomes, resist = get_BLT_data(mat_file, id, continuous)
         subjects.append(Subject(id, df, outcomes, resist))
