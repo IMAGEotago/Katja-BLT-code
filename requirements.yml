@@ -12,6 +12,6 @@ dependencies:
   - arviz=0.11.0
   - scikit-learn
   - theano
-  - numpy
+  - numpy=1.22.1
   - scipy
 prefix: /opt/homebrew/Caskroom/miniforge/base/envs/dmpy_env

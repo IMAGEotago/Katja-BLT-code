@@ -6,17 +6,22 @@ This code was written to simulate and interpret data from the Breathing Learning
 ## How to use
 ### Install repository
 Create a local version of the repository using the commands:
-`git clone https://github.com/IMAGEotago/Katja-BLT-code.git`
-`git submodule init`
-`git submodule update`
+```
+git clone https://github.com/IMAGEotago/Katja-BLT-code.git
+cd Katja-BLT-code
+git submodule init
+git submodule update
+```
 
 ### Get data
 Create a folder called 'input-files' in the repository folder. Within this folder put the 'data' folder containing the subject data.
 
 ### Create virtual environment
 Create a conda environment using the requirements.yml file. The command for this is:
-`conda env create -f requirements.yml`
-`conda activate dmpy_env`
+```
+conda env create -f requirements.yml
+conda activate dmpy_env
+```
 This will create a virtual environment called 'dmpy_env' that contains the python packages necessary to run the code.
 
 ### Run the program
