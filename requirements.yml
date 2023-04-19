@@ -4,14 +4,13 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8
-  - matplotlib
-  - pandas
+  - matplotlib=3.6.2
+  - pandas=1.5.3
   - pymc3=3.11.5
-  - seaborn
-  - ipython
+  - seaborn=0.12.2
   - arviz=0.11.0
-  - scikit-learn
-  - theano
+  - scikit-learn=1.2.1
+  - theano=1.0.5
   - numpy=1.22.1
-  - scipy
+  - scipy=1.7.3
 prefix: /opt/homebrew/Caskroom/miniforge/base/envs/dmpy_env

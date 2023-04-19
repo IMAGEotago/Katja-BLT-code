@@ -8,13 +8,12 @@ This code was written to simulate and interpret data from the Breathing Learning
 Create a local version of the repository using the commands:
 ```
 git clone https://github.com/IMAGEotago/Katja-BLT-code.git
-cd Katja-BLT-code
-git submodule init
-git submodule update
+cd Katja-BLT-code/
+git submodule update --init
 ```
 
 ### Get data
-Create a folder called 'input-files' in the repository folder. Within this folder put the 'data' folder containing the subject data.
+Within the 'input_files' folder put the 'data' folder containing the subject data.
 
 ### Create virtual environment
 Create a conda environment using the requirements.yml file. The command for this is:
@@ -25,7 +24,7 @@ conda activate dmpy_env
 This will create a virtual environment called 'dmpy_env' that contains the python packages necessary to run the code.
 
 ### Run the program
-Open and run the script 'main_BLT.py'. This script will run model simulation and parameter recovery followed by model fitting for each subject provided. To skip the simulation and parameter recovery steps, comment out line 28 in the script.
+Open and run the script 'main_BLT.py' in the 'dmpy_env' virtual environment. This script will run model simulation and parameter recovery followed by model fitting for each subject provided. To skip the simulation and parameter recovery steps, comment out line 28 in the script.
 
 The 'params.py' file contains parameters for model simulation and fitting. Some useful parameters that can be changed include:
 - `continuous`: this can be set to `True` to run the continous model and `False` to run the binary model
