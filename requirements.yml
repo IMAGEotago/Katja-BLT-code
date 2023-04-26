@@ -1,16 +1,16 @@
-name: dmpy_env
+name: blt_env
 channels:
   - defaults
   - conda-forge
 dependencies:
   - python=3.8
-  - matplotlib=3.6.2
-  - pandas=1.5.3
+  - matplotlib
+  - pandas
   - pymc3=3.11.5
-  - seaborn=0.12.2
+  - seaborn
   - arviz=0.11.0
-  - scikit-learn=1.2.1
-  - theano=1.0.5
+  - scikit-learn
+  - theano-pymc=1.1.2
+  - scipy
   - numpy=1.22.1
-  - scipy=1.7.3
-prefix: /opt/homebrew/Caskroom/miniforge/base/envs/dmpy_env
+prefix: /opt/homebrew/Caskroom/miniforge/base/envs/blt_env
